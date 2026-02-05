@@ -159,5 +159,5 @@ graph TD;
 ---
 
 <div align="center">
-  <p>Documentação desenvolvida por Natan Guimarães dos Santos e Heron de Souza - SITE.</p>
+  <p>Documentação desenvolvida por Natan Guimarães dos Santos e Heron de Souza.</p>
 </div>
