@@ -1,0 +1,9 @@
+{
+  "name": "siv-site-backend",
+  "version": "1.0.0",
+  "description": "Backend do SIV-SITE",
+  "main": "servidor.js",
+  "scripts": {
+    "dev": "node servidor.js"
+  }
+}

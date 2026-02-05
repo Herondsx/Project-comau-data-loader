@@ -1,0 +1,9 @@
+{
+  "name": "siv-site-frontend",
+  "version": "1.0.0",
+  "description": "Frontend do SIV-SITE",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  }
+}
