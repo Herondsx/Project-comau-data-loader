@@ -56,7 +56,7 @@ O sistema propõe uma arquitetura de processamento inteligente que ingere arquiv
 ### Objetivos Principais
 
 1. **Centralização de Inputs:** Recebimento unificado de arquivos `.xlsx` e `.xlsm`.
-2. **Processamento Lógico:** Aplicação de algoritmos de "limpeza" e organização baseados em regras de negócio pré-definidas.
+2. **Processamento Lógico:** Aplicação de algoritmos de organização baseados em regras de negócio pré-definidas.
 3. **Estruturação Hierárquica:** Agrupamento automático de dados seguindo a árvore lógica do projeto:
    - *Linhas de Montagem* ➔ *Transmissões (IDs)* ➔ *Listas de Materiais (BOM)*.
 4. **Visualização Otimizada:** Interface ou saída de dados que permite ao usuário visualizar o projeto de forma macro e micro, com todas as dependências corretamente vinculadas.
