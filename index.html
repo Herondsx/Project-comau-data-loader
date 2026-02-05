@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DataViz - Dashboard</title>
+    <title>SIV-SITE - Sistema de Integração e Visualização de Projetos</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,24 +11,33 @@
 </head>
 <body>
     <div id="app" class="app-container">
-        
-        <!-- UPLOAD VIEW -->
+
+        <!-- ============================================
+             UPLOAD VIEW - Tela inicial de upload de arquivos
+             Permite o usuário arrastar ou selecionar arquivos
+             Excel (.xlsx, .xlsm) para processamento
+             ============================================ -->
         <div id="upload-view" class="upload-view">
             <div class="upload-content">
                 <div class="upload-header">
-                    <div class="upload-icon-wrapper">
-                        <svg class="upload-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                            <line x1="10" y1="9" x2="8" y2="9"></line>
-                        </svg>
+                    <div class="upload-logo">
+                        <div class="logo-badge">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                                <polyline points="2 17 12 22 22 17"></polyline>
+                                <polyline points="2 12 12 17 22 12"></polyline>
+                            </svg>
+                        </div>
+                        <div class="logo-text-group">
+                            <span class="logo-title">SIV-SITE</span>
+                            <span class="logo-subtitle">Sistema de Integração e Visualização</span>
+                        </div>
                     </div>
-                    <h1>Importar Dados</h1>
-                    <p>Arraste sua planilha para começar a análise visual.</p>
+                    <h1>Importar Dados do Projeto</h1>
+                    <p>Arraste suas planilhas de montagem e lista de materiais para iniciar a visualização hierárquica.</p>
                 </div>
 
+                <!-- Dropzone - Área de arrastar e soltar arquivos -->
                 <div id="dropzone" class="dropzone">
                     <div id="dropzone-content" class="dropzone-default">
                         <div class="dropzone-icon">
@@ -38,10 +47,29 @@
                                 <line x1="12" y1="3" x2="12" y2="15"></line>
                             </svg>
                         </div>
-                        <h3>Arraste ou clique</h3>
-                        <p>Suporta .CSV, .XLSX e .JSON</p>
+                        <h3>Arraste ou clique para selecionar</h3>
+                        <p>Suporta arquivos .XLSX e .XLSM</p>
+                        <div class="file-types">
+                            <span class="file-badge">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                                Lista de Materiais (BOM)
+                            </span>
+                            <span class="file-badge">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="3" y1="9" x2="21" y2="9"></line>
+                                    <line x1="9" y1="21" x2="9" y2="9"></line>
+                                </svg>
+                                Cronograma de Montagem
+                            </span>
+                        </div>
                         <button class="btn-primary">Buscar Arquivo</button>
                     </div>
+
+                    <!-- Estado de upload em progresso -->
                     <div id="dropzone-uploading" class="dropzone-uploading hidden">
                         <div class="upload-spinner">
                             <svg class="spinner-svg" viewBox="0 0 24 24">
@@ -50,32 +78,63 @@
                             </svg>
                             <span id="upload-progress">0%</span>
                         </div>
-                        <div>
-                            <h3>Processando</h3>
-                            <p>Organizando colunas e linhas...</p>
+                        <div class="upload-status">
+                            <h3 id="upload-status-title">Processando</h3>
+                            <p id="upload-status-text">Validando formato do arquivo...</p>
                         </div>
+                        <div class="upload-steps">
+                            <div class="step active" data-step="1">
+                                <span class="step-dot"></span>
+                                <span class="step-label">Validação</span>
+                            </div>
+                            <div class="step" data-step="2">
+                                <span class="step-dot"></span>
+                                <span class="step-label">Normalização</span>
+                            </div>
+                            <div class="step" data-step="3">
+                                <span class="step-dot"></span>
+                                <span class="step-label">Vínculos</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informações do sistema -->
+                <div class="upload-info">
+                    <div class="info-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                        <span>O sistema identifica automaticamente as colunas-chave e cria vínculos hierárquicos</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- MAIN APP (SIDEBAR + CONTENT) -->
+        <!-- ============================================
+             MAIN APP - Layout principal com Sidebar e Conteúdo
+             Exibido após o processamento do arquivo
+             ============================================ -->
         <div id="main-app" class="main-app hidden">
-            
-            <!-- SIDEBAR -->
+
+            <!-- SIDEBAR - Menu lateral de navegação -->
             <aside id="sidebar" class="sidebar">
                 <div class="sidebar-logo">
                     <div class="logo-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="18" y1="20" x2="18" y2="10"></line>
-                            <line x1="12" y1="20" x2="12" y2="4"></line>
-                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                            <polyline points="2 17 12 22 22 17"></polyline>
+                            <polyline points="2 12 12 17 22 12"></polyline>
                         </svg>
                     </div>
-                    <span class="logo-text">DataViz</span>
+                    <span class="logo-text">SIV-SITE</span>
                 </div>
 
+                <!-- Navegação principal -->
                 <nav class="sidebar-nav">
+                    <!-- Dashboard / Visão Geral -->
                     <button class="nav-item active" data-tab="dashboard">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
@@ -83,6 +142,22 @@
                         </svg>
                         <span>Visão Geral</span>
                     </button>
+
+                    <!-- Árvore Hierárquica (Principal do sistema) -->
+                    <button class="nav-item" data-tab="hierarchy">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="6" height="6" rx="1"></rect>
+                            <rect x="15" y="3" width="6" height="6" rx="1"></rect>
+                            <rect x="9" y="15" width="6" height="6" rx="1"></rect>
+                            <line x1="6" y1="9" x2="6" y2="12"></line>
+                            <line x1="18" y1="9" x2="18" y2="12"></line>
+                            <line x1="6" y1="12" x2="18" y2="12"></line>
+                            <line x1="12" y1="12" x2="12" y2="15"></line>
+                        </svg>
+                        <span>Árvore do Projeto</span>
+                    </button>
+
+                    <!-- Tabela de Dados / BOM -->
                     <button class="nav-item" data-tab="table">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -91,38 +166,41 @@
                             <line x1="9" y1="3" x2="9" y2="21"></line>
                             <line x1="15" y1="3" x2="15" y2="21"></line>
                         </svg>
-                        <span>Dados</span>
+                        <span>Lista de Materiais</span>
                     </button>
-                    <button class="nav-item" data-tab="reports">
+
+                    <!-- Exportação -->
+                    <button class="nav-item" data-tab="export">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
                         </svg>
-                        <span>Relatórios</span>
-                    </button>
-                    <button class="nav-item" data-tab="settings">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="3"></circle>
-                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                        </svg>
-                        <span>Ajustes</span>
+                        <span>Exportar</span>
                     </button>
                 </nav>
 
+                <!-- Rodapé da sidebar -->
                 <div class="sidebar-footer">
+                    <div class="project-info">
+                        <span class="project-label">Projeto Ativo</span>
+                        <span class="project-name" id="active-project-name">Linha Body Shop 2024</span>
+                    </div>
                     <button id="logout-btn" class="nav-item logout">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
                         </svg>
-                        <span>Sair</span>
+                        <span>Novo Projeto</span>
                     </button>
                 </div>
             </aside>
 
-            <!-- MAIN CONTENT -->
+            <!-- MAIN CONTENT - Área de conteúdo principal -->
             <main class="main-content">
-                <!-- HEADER -->
+
+                <!-- HEADER - Cabeçalho com título e ações -->
                 <header class="header">
                     <div class="header-left">
                         <button id="toggle-sidebar" class="header-btn">
@@ -132,164 +210,267 @@
                                 <line x1="3" y1="18" x2="21" y2="18"></line>
                             </svg>
                         </button>
-                        <h2 id="page-title">Dashboard</h2>
+                        <div class="header-title-group">
+                            <h2 id="page-title">Visão Geral</h2>
+                            <span class="header-breadcrumb" id="page-breadcrumb">Dashboard do Projeto</span>
+                        </div>
                     </div>
                     <div class="header-right">
-                        <div class="notification-btn">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                            </svg>
-                            <span class="notification-dot"></span>
+                        <div class="header-stats">
+                            <div class="header-stat">
+                                <span class="header-stat-value" id="header-lines-count">3</span>
+                                <span class="header-stat-label">Linhas</span>
+                            </div>
+                            <div class="header-stat">
+                                <span class="header-stat-value" id="header-transmissions-count">12</span>
+                                <span class="header-stat-label">Transmissões</span>
+                            </div>
                         </div>
-                        <div class="user-avatar">AD</div>
+                        <div class="user-avatar">NG</div>
                     </div>
                 </header>
 
-                <!-- CONTENT AREA -->
+                <!-- CONTENT AREA - Área de conteúdo scrollável -->
                 <div class="content-area">
-                    
-                    <!-- DASHBOARD VIEW -->
+
+                    <!-- ============================================
+                         DASHBOARD VIEW - Visão geral com estatísticas
+                         ============================================ -->
                     <div id="dashboard-view" class="view-content">
+
+                        <!-- Cards de estatísticas principais -->
                         <div class="stats-grid">
+                            <!-- Card: Linhas de Montagem -->
+                            <div class="card stat-card stat-primary">
+                                <div class="stat-header">
+                                    <div class="stat-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                                            <polyline points="2 17 12 22 22 17"></polyline>
+                                            <polyline points="2 12 12 17 22 12"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div class="stat-trend positive">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                                            <polyline points="17 6 23 6 23 12"></polyline>
+                                        </svg>
+                                        100%
+                                    </div>
+                                </div>
+                                <div class="stat-body">
+                                    <p class="stat-label">Linhas de Montagem</p>
+                                    <h3 class="stat-value" id="total-lines">3</h3>
+                                </div>
+                            </div>
+
+                            <!-- Card: IDs/Transmissões -->
                             <div class="card stat-card">
                                 <div class="stat-header">
                                     <div class="stat-icon">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <line x1="12" y1="1" x2="12" y2="23"></line>
-                                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="8.5" cy="7" r="4"></circle>
+                                            <line x1="20" y1="8" x2="20" y2="14"></line>
+                                            <line x1="23" y1="11" x2="17" y2="11"></line>
                                         </svg>
-                                    </div>
-                                    <div class="stat-trend">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-                                            <polyline points="17 6 23 6 23 12"></polyline>
-                                        </svg>
-                                        +12.5%
                                     </div>
                                 </div>
                                 <div class="stat-body">
-                                    <p class="stat-label">Receita Total</p>
-                                    <h3 class="stat-value"><span class="currency">R$</span><span id="total-amount">0</span></h3>
+                                    <p class="stat-label">IDs / Transmissões</p>
+                                    <h3 class="stat-value" id="total-transmissions">12</h3>
                                 </div>
                             </div>
 
+                            <!-- Card: Itens na BOM -->
                             <div class="card stat-card">
                                 <div class="stat-header">
                                     <div class="stat-icon">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
                                             <polyline points="14 2 14 8 20 8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
                                         </svg>
                                     </div>
                                 </div>
                                 <div class="stat-body">
-                                    <p class="stat-label">Registros</p>
-                                    <h3 class="stat-value" id="total-records">0</h3>
+                                    <p class="stat-label">Itens na BOM</p>
+                                    <h3 class="stat-value" id="total-bom-items">847</h3>
                                 </div>
                             </div>
 
+                            <!-- Card: Vínculos Criados -->
                             <div class="card stat-card">
                                 <div class="stat-header">
                                     <div class="stat-icon">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <circle cx="12" cy="12" r="10"></circle>
-                                            <line x1="12" y1="8" x2="12" y2="12"></line>
-                                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
                                         </svg>
                                     </div>
-                                    <div class="stat-trend warning">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-                                            <polyline points="17 6 23 6 23 12"></polyline>
+                                    <div class="stat-trend positive">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="20 6 9 17 4 12"></polyline>
                                         </svg>
-                                        Atenção
+                                        OK
                                     </div>
                                 </div>
                                 <div class="stat-body">
-                                    <p class="stat-label">Pendentes</p>
-                                    <h3 class="stat-value" id="pending-count">0</h3>
-                                </div>
-                            </div>
-
-                            <div class="card stat-card">
-                                <div class="stat-header">
-                                    <div class="stat-icon">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                            <circle cx="9" cy="7" r="4"></circle>
-                                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                                        </svg>
-                                    </div>
-                                </div>
-                                <div class="stat-body">
-                                    <p class="stat-label">Regiões</p>
-                                    <h3 class="stat-value">5</h3>
+                                    <p class="stat-label">Vínculos Criados</p>
+                                    <h3 class="stat-value" id="total-links">859</h3>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- Grid de gráficos -->
                         <div class="charts-grid">
+                            <!-- Gráfico: Distribuição por Linha -->
                             <div class="card chart-card chart-large">
                                 <div class="chart-header">
                                     <div>
-                                        <h3>Análise de Receita</h3>
-                                        <p>Comparativo mensal</p>
+                                        <h3>Distribuição por Linha de Montagem</h3>
+                                        <p>Quantidade de transmissões e itens por linha</p>
                                     </div>
-                                    <button class="btn-filter">Filtrar</button>
                                 </div>
                                 <div class="chart-body">
-                                    <svg id="area-chart" class="area-chart" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                        <defs>
-                                            <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.3" />
-                                                <stop offset="100%" stop-color="#3b82f6" stop-opacity="0" />
-                                            </linearGradient>
-                                        </defs>
-                                        <path id="area-fill" fill="url(#chartGradient)" />
-                                        <polyline id="area-line" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
-                                    </svg>
+                                    <div id="lines-chart" class="horizontal-bars"></div>
                                 </div>
                             </div>
 
+                            <!-- Gráfico: Status dos Vínculos -->
                             <div class="card chart-card">
                                 <div class="chart-header">
                                     <div>
-                                        <h3>Categorias</h3>
-                                        <p>Distribuição por setor</p>
+                                        <h3>Status dos Dados</h3>
+                                        <p>Integridade dos vínculos</p>
                                     </div>
                                 </div>
-                                <div class="chart-body">
-                                    <div id="bar-chart" class="bar-chart"></div>
+                                <div class="chart-body chart-body-center">
+                                    <div id="status-chart" class="donut-chart">
+                                        <svg viewBox="0 0 36 36" class="donut-svg">
+                                            <circle class="donut-bg" cx="18" cy="18" r="15.9" fill="none" stroke-width="3"></circle>
+                                            <circle class="donut-segment donut-success" cx="18" cy="18" r="15.9" fill="none" stroke-width="3" stroke-dasharray="85 15" stroke-dashoffset="25"></circle>
+                                            <circle class="donut-segment donut-warning" cx="18" cy="18" r="15.9" fill="none" stroke-width="3" stroke-dasharray="10 90" stroke-dashoffset="-60"></circle>
+                                            <circle class="donut-segment donut-error" cx="18" cy="18" r="15.9" fill="none" stroke-width="3" stroke-dasharray="5 95" stroke-dashoffset="-70"></circle>
+                                        </svg>
+                                        <div class="donut-center">
+                                            <span class="donut-value">85%</span>
+                                            <span class="donut-label">Vinculados</span>
+                                        </div>
+                                    </div>
+                                    <div class="chart-legend">
+                                        <div class="legend-item">
+                                            <span class="legend-dot success"></span>
+                                            <span>Vinculados (85%)</span>
+                                        </div>
+                                        <div class="legend-item">
+                                            <span class="legend-dot warning"></span>
+                                            <span>Pendentes (10%)</span>
+                                        </div>
+                                        <div class="legend-item">
+                                            <span class="legend-dot error"></span>
+                                            <span>Sem vínculo (5%)</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- Banner de ação rápida -->
                         <div class="notification-banner">
                             <div class="notification-bg"></div>
                             <div class="notification-content">
                                 <div class="notification-icon">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                                        <rect x="3" y="3" width="6" height="6" rx="1"></rect>
+                                        <rect x="15" y="3" width="6" height="6" rx="1"></rect>
+                                        <rect x="9" y="15" width="6" height="6" rx="1"></rect>
+                                        <line x1="6" y1="9" x2="6" y2="12"></line>
+                                        <line x1="18" y1="9" x2="18" y2="12"></line>
+                                        <line x1="6" y1="12" x2="18" y2="12"></line>
+                                        <line x1="12" y1="12" x2="12" y2="15"></line>
                                     </svg>
                                 </div>
                                 <div class="notification-text">
-                                    <h4>Insights Disponíveis</h4>
-                                    <p>O sistema identificou um padrão de crescimento na região Sul. Clique para ver a análise detalhada.</p>
+                                    <h4>Visualização Hierárquica Pronta</h4>
+                                    <p>Todos os vínculos foram criados com sucesso. Acesse a Árvore do Projeto para navegar pela estrutura completa de Linhas, Transmissões e Materiais.</p>
                                 </div>
                             </div>
-                            <div class="notification-arrow">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <line x1="7" y1="17" x2="17" y2="7"></line>
-                                    <polyline points="7 7 17 7 17 17"></polyline>
+                            <button class="notification-btn-action" data-goto="hierarchy">
+                                Ver Árvore
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    <polyline points="12 5 19 12 12 19"></polyline>
                                 </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ============================================
+                         HIERARCHY VIEW - Árvore hierárquica do projeto
+                         Visualização principal: Linhas → Transmissões → BOM
+                         ============================================ -->
+                    <div id="hierarchy-view" class="view-content hidden">
+
+                        <!-- Controles da árvore -->
+                        <div class="tree-controls">
+                            <div class="tree-search">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                                <input type="text" id="tree-search-input" placeholder="Buscar linha, transmissão ou material...">
+                            </div>
+                            <div class="tree-actions">
+                                <button class="btn-tree-action" id="expand-all">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="15 3 21 3 21 9"></polyline>
+                                        <polyline points="9 21 3 21 3 15"></polyline>
+                                        <line x1="21" y1="3" x2="14" y2="10"></line>
+                                        <line x1="3" y1="21" x2="10" y2="14"></line>
+                                    </svg>
+                                    Expandir Tudo
+                                </button>
+                                <button class="btn-tree-action" id="collapse-all">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="4 14 10 14 10 20"></polyline>
+                                        <polyline points="20 10 14 10 14 4"></polyline>
+                                        <line x1="14" y1="10" x2="21" y2="3"></line>
+                                        <line x1="3" y1="21" x2="10" y2="14"></line>
+                                    </svg>
+                                    Recolher Tudo
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Container da árvore hierárquica -->
+                        <div class="tree-container card">
+                            <div id="hierarchy-tree" class="hierarchy-tree">
+                                <!-- A árvore será renderizada via JavaScript -->
+                            </div>
+                        </div>
+
+                        <!-- Painel de detalhes (aparece ao selecionar um item) -->
+                        <div id="detail-panel" class="detail-panel hidden">
+                            <div class="detail-header">
+                                <h3 id="detail-title">Detalhes do Item</h3>
+                                <button class="btn-close-detail" id="close-detail">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div id="detail-content" class="detail-content">
+                                <!-- Conteúdo será preenchido via JavaScript -->
                             </div>
                         </div>
                     </div>
 
-                    <!-- TABLE VIEW -->
+                    <!-- ============================================
+                         TABLE VIEW - Tabela com lista de materiais (BOM)
+                         ============================================ -->
                     <div id="table-view" class="view-content hidden">
                         <div class="table-controls">
                             <div class="search-box">
@@ -297,14 +478,15 @@
                                     <circle cx="11" cy="11" r="8"></circle>
                                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                                 </svg>
-                                <input type="text" id="search-input" placeholder="Buscar...">
+                                <input type="text" id="search-input" placeholder="Buscar por código, descrição ou linha...">
                             </div>
                             <div class="table-actions">
-                                <button class="btn-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                                    </svg>
-                                </button>
+                                <select id="filter-line" class="select-filter">
+                                    <option value="">Todas as Linhas</option>
+                                </select>
+                                <select id="filter-transmission" class="select-filter">
+                                    <option value="">Todas as Transmissões</option>
+                                </select>
                                 <button class="btn-export">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -320,43 +502,129 @@
                             <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Produto</th>
-                                        <th>Categoria</th>
-                                        <th>Data</th>
-                                        <th class="text-right">Valor</th>
+                                        <th>Código</th>
+                                        <th>Descrição</th>
+                                        <th>Linha</th>
+                                        <th>Transmissão</th>
+                                        <th class="text-right">Qtd</th>
+                                        <th>Unidade</th>
                                         <th class="text-center">Status</th>
-                                        <th></th>
                                     </tr>
                                 </thead>
                                 <tbody id="table-body">
-                                    <!-- Data will be injected here -->
+                                    <!-- Dados serão inseridos via JavaScript -->
                                 </tbody>
                             </table>
                         </div>
-                    </div>
 
-                    <!-- REPORTS VIEW -->
-                    <div id="reports-view" class="view-content hidden">
-                        <div class="empty-state">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
-                                <polyline points="14 2 14 8 20 8"></polyline>
-                            </svg>
-                            <h3>Relatórios em Breve</h3>
-                            <p>Esta funcionalidade está em desenvolvimento.</p>
+                        <!-- Paginação -->
+                        <div class="table-pagination">
+                            <span class="pagination-info" id="pagination-info">Mostrando 1-20 de 847 itens</span>
+                            <div class="pagination-controls">
+                                <button class="btn-page" id="prev-page" disabled>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="15 18 9 12 15 6"></polyline>
+                                    </svg>
+                                </button>
+                                <span class="page-numbers" id="page-numbers">1 / 43</span>
+                                <button class="btn-page" id="next-page">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="9 18 15 12 9 6"></polyline>
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- SETTINGS VIEW -->
-                    <div id="settings-view" class="view-content hidden">
-                        <div class="empty-state">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="3"></circle>
-                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                            </svg>
-                            <h3>Configurações</h3>
-                            <p>Esta funcionalidade está em desenvolvimento.</p>
+                    <!-- ============================================
+                         EXPORT VIEW - Opções de exportação
+                         ============================================ -->
+                    <div id="export-view" class="view-content hidden">
+                        <div class="export-grid">
+                            <!-- Card: Exportar Excel Organizado -->
+                            <div class="card export-card">
+                                <div class="export-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    </svg>
+                                </div>
+                                <h3>Excel Organizado</h3>
+                                <p>Exporta todos os dados com a estrutura hierárquica preservada em abas separadas.</p>
+                                <button class="btn-export-action">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="7 10 12 15 17 10"></polyline>
+                                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                                    </svg>
+                                    Baixar .XLSX
+                                </button>
+                            </div>
+
+                            <!-- Card: Exportar PDF -->
+                            <div class="card export-card">
+                                <div class="export-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                    </svg>
+                                </div>
+                                <h3>Relatório PDF</h3>
+                                <p>Gera um relatório formatado com resumo executivo e árvore visual do projeto.</p>
+                                <button class="btn-export-action">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="7 10 12 15 17 10"></polyline>
+                                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                                    </svg>
+                                    Baixar .PDF
+                                </button>
+                            </div>
+
+                            <!-- Card: Exportar JSON -->
+                            <div class="card export-card">
+                                <div class="export-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="16 18 22 12 16 6"></polyline>
+                                        <polyline points="8 6 2 12 8 18"></polyline>
+                                    </svg>
+                                </div>
+                                <h3>Dados JSON</h3>
+                                <p>Exporta a estrutura completa em formato JSON para integração com outros sistemas.</p>
+                                <button class="btn-export-action">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="7 10 12 15 17 10"></polyline>
+                                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                                    </svg>
+                                    Baixar .JSON
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Resumo da exportação -->
+                        <div class="export-summary card">
+                            <h3>Resumo dos Dados</h3>
+                            <div class="summary-grid">
+                                <div class="summary-item">
+                                    <span class="summary-value" id="export-lines">3</span>
+                                    <span class="summary-label">Linhas de Montagem</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-value" id="export-transmissions">12</span>
+                                    <span class="summary-label">Transmissões</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-value" id="export-items">847</span>
+                                    <span class="summary-label">Itens da BOM</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-value" id="export-links">859</span>
+                                    <span class="summary-label">Vínculos</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
