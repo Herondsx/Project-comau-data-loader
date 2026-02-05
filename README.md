@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>Sistema de Integração e Visualização de Projetos (SIV-SITE)</h1>
+  <h1>Sistema de Integração e Visualização de Projetos - Comau - (SIV-SITE)</h1>
   
   <p>
     Uma solução para centralização, tratamento e visualização hierárquica de dados de montagem e listas de materiais.
