@@ -69,7 +69,7 @@ Comparativo de eficiência entre o processo manual atual e a automação propost
 
 | Métrica | Processo Atual (Manual) | SIV-SITE (Automatizado) | Melhoria Estimada |
 | :--- | :--- | :--- | :---: |
-| **Tempo de Análise** | Horas (Agrupamento manual) | Minutos (Processamento auto) | 🔽 **90%** |
+| **Tempo de Análise** | Horas (Agrupamento manual) | Minutos (Processamento auto) | 🔼 **Alta** |
 | **Integridade de Dados** | Alta propensão a erro humano | Validação lógica por código | 🔼 **Alta** |
 | **Visualização** | Planilhas desconexas | Dashboard Unificado | ✅ **Total** |
 
