@@ -266,6 +266,101 @@ let elements = {};
  * Inicializa as referências aos elementos do DOM
  * Deve ser chamada após o carregamento completo do documento
  */
+
+
+// ==============================================================
+// 1. VARIÁVEL GLOBAL
+// ==============================================================
+// ==============================================================
+// LÓGICA DE IMPORTAÇÃO EXCEL
+// ==============================================================
+// ==============================================================
+// LÓGICA DE IMPORTAÇÃO EXCEL (Compatível com seu arquivo)
+// ==============================================================
+let meusDados = []; 
+
+// ==============================================================
+// LÓGICA DE IMPORTAÇÃO EXCEL - MODELO SIMPLIFICADO (CONSOLE)
+// ==============================================================
+function configurarBotaoExcel() {
+    const btnBuscar = document.querySelector('.btn-primary'); 
+    
+    if (btnBuscar) {
+        btnBuscar.addEventListener('click', function() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.xlsx, .xls, .xlsm';
+
+            input.onchange = function(evento) {
+                const arquivo = evento.target.files[0];
+                if (!arquivo) return;
+
+                const leitor = new FileReader();
+                leitor.onload = function(e) {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: "array" });
+
+
+                    // Converte para JSON (Array de Arrays conforme seu modelo)
+                    const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                    
+                    // Salva na variável global caso precise usar depois
+                    meusDados = json;
+                };
+                leitor.readAsArrayBuffer(arquivo);
+            };
+            input.click();
+        });
+
+    }
+}
+
+function lerArquivoExcel(arquivo) {
+
+       document.getElementById('inputExcel').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    
+    if (!file) {
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+
+        // Pega a primeira aba (planilha) do arquivo
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+
+        // Converte o conteúdo para formato JSON ou Texto para exibir no alert
+        // 'defval' define o que aparece se a célula estiver vazia
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        // Formata os dados para exibir no alert de forma legível
+        let output = "Dados encontrados:\n\n";
+        jsonData.forEach(row => {
+            output += row.join(" | ") + "\n";
+        });
+
+        alert(output);
+    };
+
+    // Lê o arquivo como um ArrayBuffer (binário)
+    reader.readAsArrayBuffer(file);
+});
+}
+
+// ==============================================================
+// 4. EXEMPLO DE COMO USAR OS DADOS (Pode apagar depois)
+// ==============================================================
+// Para testar, abra o Console do navegador (F12) depois de carregar o arquivo
+// e digite: meusDados
+
+// 3. Função para ler o Excel (usando a biblioteca SheetJS)
+
+
 function initDOMElements() {
     elements = {
         // === Tela de Upload ===
@@ -277,6 +372,7 @@ function initDOMElements() {
         uploadStatusTitle: document.getElementById('upload-status-title'),
         uploadStatusText: document.getElementById('upload-status-text'),
         uploadSteps: document.querySelectorAll('.upload-steps .step'),
+        fileInput: document.getElementById('file-input'),
 
         // === Layout Principal ===
         mainApp: document.getElementById('main-app'),
@@ -1361,30 +1457,22 @@ function debounce(func, wait) {
 }
 
 
-/* ============================================================================
-   11. INICIALIZAÇÃO (Initialization)
-   ============================================================================
-   Função principal que inicializa todo o sistema.
-   ============================================================================ */
-
 /**
  * Inicializa a aplicação
- * Configura todos os elementos e eventos necessários
  */
 function init() {
-    // Carrega referências aos elementos do DOM
     initDOMElements();
-
-    // Inicializa cada módulo
     initUpload();
     initNavigation();
     initHierarchyTree();
     initTable();
     initExport();
+    
+    // Ativa a lógica de leitura do Excel
+    configurarBotaoExcel();
 
-    console.log('SIV-SITE inicializado com sucesso.');
-    console.log('Versão: 1.0.0 (MVP - Preview Estática)');
+    console.log('SIV-SITE: Sistema pronto. Use o botão "Buscar" para carregar o Excel.');
 }
 
-// Aguarda carregamento do DOM e inicializa
+// Inicia o sistema
 document.addEventListener('DOMContentLoaded', init);
