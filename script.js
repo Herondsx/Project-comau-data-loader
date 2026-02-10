@@ -3,8 +3,6 @@
  * SIV-SITE - Sistema de Integração e Visualização de Projetos
  * Módulo: Tracker Dashboard (PowerPoint Style)
  * ============================================================================
- * * Este arquivo modulariza a lógica de controle da interface, processamento
- * de dados e alternância de views.
  */
 
 // ==============================================================
@@ -12,32 +10,22 @@
 // ==============================================================
 
 const state = {
-    currentView: 'tracker', // 'tracker' ou 'table'
+    currentView: 'tracker',
     filters: {
         line: 'AUFBAU',
         station: 'all'
     },
-    data: null, // Dados processados para exibição visual
-    rawExcelData: [] // Dados brutos importados do Excel
+    data: null,
+    rawExcelData: []
 };
 
-// Dados simulados baseados no PPT do usuário (Fallback)
 const MOCK_DATA = {
     "OP20": [
         { id: "XXXX-XXXX-0003-2026", phases: generatePhases("04/02", "04/02", "04/02", "08/02", "10/02") },
-        { id: "XXXX-XXXX-0004-2026", phases: generatePhases("04/02", "04/02", "04/02", "04/02", "04/02") },
-        { id: "XXXX-XXXX-0005-2026", phases: generatePhases("04/02", "04/02", "04/02", "08/02", "04/02") }
-    ],
-    "OP30": [
-        { id: "XXXX-XXXX-0006-2026", phases: generatePhases("15/05", "15/05", "15/05", "15/05", "15/05") },
-        { id: "XXXX-XXXX-0007-2026", phases: generatePhases("15/05", "20/05", "15/05", "15/05", "15/05") }
-    ],
-    "OP40": [
-        { id: "XXXX-XXXX-0008-2026", phases: generatePhases("15/05", "15/05", "15/05", "15/05", "15/05") }
+        { id: "XXXX-XXXX-0004-2026", phases: generatePhases("04/02", "04/02", "04/02", "04/02", "04/02") }
     ],
     "OP10": [
-        { id: "XXXX-XXXX-0001-2026", phases: generatePhases("04/02", "08/02", "04/02", "04/02", "04/02") },
-        { id: "XXXX-XXXX-0002-2026", phases: generatePhases("04/02", "04/02", "04/02", "04/02", "10/02") }
+        { id: "XXXX-XXXX-0001-2026", phases: generatePhases("04/02", "08/02", "04/02", "04/02", "04/02") }
     ]
 };
 
@@ -48,29 +36,18 @@ let elements = {};
 
 function initDOMElements() {
     elements = {
-        // Views
         uploadView: document.getElementById('upload-view'),
         mainApp: document.getElementById('main-app'),
         viewTracker: document.getElementById('view-tracker'),
         viewTable: document.getElementById('view-table'),
-        
-        // Containers de Conteúdo
         trackerContent: document.getElementById('tracker-content-area'),
         tableBody: document.getElementById('table-body'),
-        
-        // Botões de Ação
         btnBrowse: document.getElementById('btn-browse'),
         fileInput: document.getElementById('file-input'),
         dropzone: document.getElementById('dropzone'),
         btnDemo: document.getElementById('btn-demo'),
         btnLogout: document.getElementById('btn-logout'),
-        
-        // Navegação Sidebar
         navItems: document.querySelectorAll('.sidebar-icon[data-tab]'),
-        
-        // Filtros (Novos IDs do redesign)
-        filterProject: document.getElementById('filter-project-tracker'),
-        filterLine: document.getElementById('filter-line-tracker'),
         filterStation: document.getElementById('filter-station-tracker'),
         filterTransmission: document.getElementById('filter-transmission-tracker')
     };
@@ -80,56 +57,109 @@ function initDOMElements() {
 // 3. FUNÇÕES AUXILIARES DE DADOS
 // ==============================================================
 
-/** Gera estrutura de fases com status automático */
-function generatePhases(engDate, purDate, comDate, constDate, manDate) {
+function generatePhases(eng, pur, com, cons, man) {
     return [
-        { name: "Engineering", plan: "04/02", actual: engDate || "04/02" },
-        { name: "Purchasing", plan: "04/02", actual: purDate || "04/02" },
-        { name: "Commercial", plan: "04/02", actual: comDate || "04/02" },
-        { name: "Constructives", plan: "04/02", actual: constDate || "04/02" },
-        { name: "Manufacturing", plan: "04/02", actual: manDate || "04/02" },
+        { name: "Engineering", plan: "04/02", actual: eng || "04/02" },
+        { name: "Purchasing", plan: "04/02", actual: pur || "04/02" },
+        { name: "Commercial", plan: "04/02", actual: com || "04/02" },
+        { name: "Constructives", plan: "04/02", actual: cons || "04/02" },
+        { name: "Manufacturing", plan: "04/02", actual: man || "04/02" },
         { name: "Delivery", plan: "04/02", actual: "04/02" }
     ];
 }
 
-/** Determina classe CSS do status baseado em datas */
 function determineStatusClass(plan, actual) {
+    // Se houver concatenação "|" (divergência), marca como vermelho ou alerta
+    if (actual.toString().includes('|')) return 'dot-red'; 
     if (plan === actual) return 'dot-green';
     if (actual > plan) return 'dot-red'; 
     return 'dot-blue';
+}
+
+/**
+ * Converte as linhas do Excel no objeto de estado
+ */
+function parseExcelToState(rows) {
+    if (rows.length < 2) return {};
+
+    // --- CONFIGURAÇÃO DE COLUNAS (Ajuste conforme seu Excel) ---
+    // 0 = Coluna A, 1 = Coluna B, etc.
+    const COL_STATION = 0; 
+    const COL_ID = 1;      
+    const COL_PHASE = 2;   
+    const COL_PLAN = 3;    
+    const COL_ACTUAL = 4;  
+
+    const result = {};
+    const conflicts = [];
+
+    // Começa do 1 para pular o cabeçalho
+    for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        if (!row[COL_ID]) continue; // Pula linhas sem ID
+
+        const station = row[COL_STATION] || "Sem Estação";
+        const id = row[COL_ID];
+        const phaseName = row[COL_PHASE];
+        const plan = row[COL_PLAN] || "-";
+        const actual = row[COL_ACTUAL] || "-";
+
+        if (!result[station]) result[station] = [];
+
+        // Verifica se o ID já existe na estação
+        let transmission = result[station].find(t => t.id === id);
+        if (!transmission) {
+            transmission = { id: id, phases: [] };
+            result[station].push(transmission);
+        }
+
+        // Verifica se a fase já existe (Divergência)
+        let phase = transmission.phases.find(p => p.name === phaseName);
+        if (phase) {
+            if (phase.plan !== plan || phase.actual !== actual) {
+                conflicts.push(`Divergência: ID ${id} - ${phaseName}`);
+                // Concatena as informações divergentes
+                phase.plan = `${phase.plan} | ${plan}`;
+                phase.actual = `${phase.actual} | ${actual}`;
+            }
+        } else {
+            transmission.phases.push({ name: phaseName, plan, actual });
+        }
+    }
+
+    if (conflicts.length > 0) {
+        alert("⚠️ Divergências processadas:\n" + conflicts.slice(0,5).join("\n") + (conflicts.length > 5 ? "\n..." : ""));
+    }
+    return result;
 }
 
 // ==============================================================
 // 4. LÓGICA DE RENDERIZAÇÃO
 // ==============================================================
 
-/** Renderiza a visualização de Cards (Tracker) */
 function renderTracker() {
     const container = elements.trackerContent;
+    if (!container) return;
     container.innerHTML = '';
     
-    // Obtém valores dos filtros
     const stationFilter = elements.filterStation ? elements.filterStation.value : 'all';
     const transFilter = elements.filterTransmission ? elements.filterTransmission.value : 'all';
-
-    // Usa MOCK_DATA se state.data for null, para garantir que algo apareça
     const dataToRender = state.data || MOCK_DATA;
 
     for (const [station, items] of Object.entries(dataToRender)) {
         if (stationFilter !== 'all' && station !== stationFilter) continue;
         
         const filteredItems = items.filter(item => {
-            if (transFilter === 'all') return true;
-            return item.id === transFilter;
+            return transFilter === 'all' || item.id === transFilter;
         });
 
         if (filteredItems.length === 0) continue;
 
-        // Criação da Seção
         const section = document.createElement('div');
         section.className = 'station-section';
         
-        const title = document.createElement('div');
+        // CORREÇÃO: Estava 'di   '
+        const title = document.createElement('div'); 
         title.className = 'station-title';
         title.textContent = station;
         section.appendChild(title);
@@ -137,36 +167,15 @@ function renderTracker() {
         const cardsContainer = document.createElement('div');
         cardsContainer.className = 'cards-container';
 
-        // Criação dos Cards
         filteredItems.forEach(item => {
             const card = document.createElement('div');
             card.className = 'tracker-card';
             
-            const header = document.createElement('div');
-            header.className = 'card-header';
-            header.innerHTML = `
-                <span>${item.id}</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2">
-                    <circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle>
-                </svg>
-            `;
-            card.appendChild(header);
-
-            const body = document.createElement('div');
-            body.className = 'card-body';
-            const grid = document.createElement('div');
-            grid.className = 'phase-grid';
-
-            grid.innerHTML = `
-                <div class="grid-header text-left">Phase</div>
-                <div class="grid-header">Plan</div>
-                <div class="grid-header">Actual</div>
-                <div class="grid-header">Status</div>
-            `;
-
+            // Monta o HTML do card
+            let phasesHTML = '';
             item.phases.forEach(phase => {
                 const statusClass = determineStatusClass(phase.plan, phase.actual);
-                grid.innerHTML += `
+                phasesHTML += `
                     <div class="phase-row">
                         <div class="phase-name">${phase.name}</div>
                         <div class="phase-date">${phase.plan}</div>
@@ -176,8 +185,23 @@ function renderTracker() {
                 `;
             });
 
-            body.appendChild(grid);
-            card.appendChild(body);
+            card.innerHTML = `
+                <div class="card-header">
+                    <span>${item.id}</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle>
+                    </svg>
+                </div>
+                <div class="card-body">
+                    <div class="phase-grid">
+                        <div class="grid-header text-left">Phase</div>
+                        <div class="grid-header">Plan</div>
+                        <div class="grid-header">Actual</div>
+                        <div class="grid-header">Status</div>
+                        ${phasesHTML}
+                    </div>
+                </div>
+            `;
             cardsContainer.appendChild(card);
         });
 
@@ -186,9 +210,9 @@ function renderTracker() {
     }
 }
 
-/** Renderiza a visualização em Tabela */
 function renderTable() {
     const tbody = elements.tableBody;
+    if (!tbody) return;
     tbody.innerHTML = '';
     
     const dataToRender = state.data || MOCK_DATA;
@@ -196,22 +220,15 @@ function renderTable() {
     for (const [station, items] of Object.entries(dataToRender)) {
         items.forEach(item => {
             item.phases.forEach(phase => {
-                const row = document.createElement('tr');
                 const statusDot = determineStatusClass(phase.plan, phase.actual);
-                
-                let statusText = statusDot.includes('green') ? 'OK' : 
-                                 (statusDot.includes('red') ? 'Atrasado' : 'Em Andamento');
-                
+                const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${station}</td>
-                    <td style="font-family: 'Roboto Mono', monospace; font-size:12px;">${item.id}</td>
+                    <td>${item.id}</td>
                     <td>${phase.name}</td>
                     <td>${phase.plan}</td>
                     <td>${phase.actual}</td>
-                    <td>
-                        <span class="status-dot ${statusDot}" style="margin-right:5px; vertical-align:middle;"></span> 
-                        ${statusText}
-                    </td>
+                    <td><span class="status-dot ${statusDot}"></span></td>
                 `;
                 tbody.appendChild(row);
             });
@@ -231,125 +248,79 @@ function switchTab(tabName) {
     const activeIcon = document.querySelector(`.sidebar-icon[data-tab="${tabName}"]`);
     if(activeIcon) activeIcon.classList.add('active');
 
-    if(tabName === 'tracker') {
-        elements.viewTracker.classList.remove('hidden');
-    } else if (tabName === 'table') {
-        elements.viewTable.classList.remove('hidden');
-    }
+    if(tabName === 'tracker') elements.viewTracker.classList.remove('hidden');
+    else if (tabName === 'table') elements.viewTable.classList.remove('hidden');
 }
 
 function initEvents() {
-    // 1. Botão Buscar Arquivo - Abre o seletor nativo
-    elements.btnBrowse.addEventListener('click', () => {
-        elements.fileInput.click();
-    });
+    // 1. Botão Buscar
+    elements.btnBrowse.addEventListener('click', () => elements.fileInput.click());
 
-    // 2. Clique na Dropzone também abre o seletor
-    elements.dropzone.addEventListener('click', () => {
-        elements.fileInput.click();
-    });
-    
-    // 3. EVENTO DE LEITURA DO ARQUIVO (IMPLEMENTAÇÃO SOLICITADA)
+    // 2. Leitura do Arquivo Excel
     elements.fileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
-        
         if (!file) return;
 
-        // Feedback de carregamento no botão
         elements.btnBrowse.textContent = "Lendo arquivo...";
-        
         const reader = new FileReader();
 
         reader.onload = function(e) {
             try {
                 const data = new Uint8Array(e.target.result);
-                // Leitura usando a biblioteca SheetJS (XLSX)
                 const workbook = XLSX.read(data, { type: 'array' });
-
-                // Pega a primeira aba
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
-
-                // Converte para JSON (Array de Arrays)
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
                 const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-                // Salva os dados brutos no estado global
-                state.rawExcelData = jsonData;
-
-                // Prepara a mensagem de saída para o alert
-                let output = "Dados encontrados (Visualização das primeiras 10 linhas):\n\n";
                 
-                // Limita a exibição para não travar a tela se o arquivo for grande
-                const previewLimit = 10;
-                jsonData.slice(0, previewLimit).forEach(row => {
-                    output += row.join(" | ") + "\n";
-                });
+                state.rawExcelData = jsonData;
+                
+                // Processa dados e trata divergências
+                state.data = parseExcelToState(jsonData);
 
-                if (jsonData.length > previewLimit) {
-                    output += `\n... e mais ${jsonData.length - previewLimit} linhas.`;
-                }
-
-                // Exibe o alerta conforme pedido
-                alert(output);
-
-                // Carrega o app principal
-                // (Mantemos o MOCK_DATA para a visualização gráfica enquanto o parser real não é feito)
-                state.data = MOCK_DATA;
+                elements.btnBrowse.textContent = "Buscar Arquivo";
                 startApp();
-
             } catch (error) {
-                console.error("Erro na leitura do Excel:", error);
-                alert("Erro ao ler o arquivo. Verifique se é um Excel válido.");
+                console.error(error);
+                alert("Erro ao ler o arquivo.");
                 elements.btnBrowse.textContent = "Buscar Arquivo";
             }
         };
-
-        // Inicia a leitura do arquivo como ArrayBuffer
         reader.readAsArrayBuffer(file);
     });
 
-    // Botão Demo
+    // 3. Botão Demo
     elements.btnDemo.addEventListener('click', () => {
         state.data = MOCK_DATA;
         startApp();
     });
 
-    // Navegação Sidebar
+    // 4. Navegação
     elements.navItems.forEach(item => {
         item.addEventListener('click', () => switchTab(item.dataset.tab));
     });
 
-    // Logout
+    // 5. Logout
     elements.btnLogout.addEventListener('click', () => location.reload());
 
-    // Filtros
+    // 6. Filtros
     if (elements.filterStation) {
-        elements.filterStation.addEventListener('change', () => {
-            renderTracker();
-        });
+        elements.filterStation.addEventListener('change', renderTracker);
     }
-    
     if (elements.filterTransmission) {
-        elements.filterTransmission.addEventListener('change', () => {
-            renderTracker();
-        });
+        elements.filterTransmission.addEventListener('change', renderTracker);
     }
 }
 
 function populateTransmissionFilter() {
     if(!elements.filterTransmission || !state.data) return;
-
     let allIds = [];
     Object.values(state.data).forEach(items => {
         items.forEach(i => allIds.push(i.id));
     });
     allIds = [...new Set(allIds)];
-
     elements.filterTransmission.innerHTML = '<option value="all">Todas</option>';
     allIds.forEach(id => {
         const opt = document.createElement('option');
-        opt.value = id;
-        opt.textContent = id;
+        opt.value = id; opt.textContent = id;
         elements.filterTransmission.appendChild(opt);
     });
 }
@@ -369,5 +340,4 @@ function startApp() {
 document.addEventListener('DOMContentLoaded', () => {
     initDOMElements();
     initEvents();
-    console.log('SIV-SITE Tracker: Inicializado com sucesso.');
 });
