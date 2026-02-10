@@ -10,15 +10,19 @@
 // ==============================================================
 
 const state = {
-    currentView: 'tracker',
+    currentView: 'tracker',      // aba atual (tracker ou table)
+    projectName: '',             // nome do projeto digitado na tela inicial
     filters: {
         line: 'AUFBAU',
         station: 'all'
     },
-    data: null,
-    rawExcelData: []
+    data: null,                  // dados processados do Excel do projeto atual
+    rawExcelData: [],            // conteúdo bruto do Excel (array de linhas) do projeto atual
+    projects: [],                // lista de projetos criados na sessão
+    currentProjectId: null       // id do projeto atualmente selecionado
 };
 
+// Dados de demonstração usados no modo "Demo"
 const MOCK_DATA = {
     "OP20": [
         { id: "XXXX-XXXX-0003-2026", phases: generatePhases("04/02", "04/02", "04/02", "08/02", "10/02") },
@@ -46,17 +50,147 @@ function initDOMElements() {
         fileInput: document.getElementById('file-input'),
         dropzone: document.getElementById('dropzone'),
         btnDemo: document.getElementById('btn-demo'),
+        btnNewProject: document.getElementById('btn-new-project'),
         btnLogout: document.getElementById('btn-logout'),
         navItems: document.querySelectorAll('.sidebar-icon[data-tab]'),
         filterStation: document.getElementById('filter-station-tracker'),
-        filterTransmission: document.getElementById('filter-transmission-tracker')
+        headerProjectTitle: document.getElementById('header-project-title'),
+        filterTransmission: document.getElementById('filter-transmission-tracker'),
+        filterProjectTracker: document.getElementById('filter-project-tracker'),
+        inputProjectName: document.getElementById('input-project-name')
     };
 }
 
 // ==============================================================
 // 3. FUNÇÕES AUXILIARES DE DADOS
+//    - Validações
+//    - Transformações de dados
+//    - Cálculo de status
 // ==============================================================
 
+// --- 3.1 Validação de entrada ---
+function validateProjectName() {
+    // Pega o valor e remove espaços extras
+    const name = elements.inputProjectName.value.trim();
+
+    if (!name) {
+        alert("⚠️ Por favor, digite o NOME DO PROJETO antes de continuar.");
+        elements.inputProjectName.focus(); // Coloca o cursor no campo
+        return false;
+    }
+
+    state.projectName = name;
+    return true;
+}
+
+// --- 3.2 Gestão de projetos (lista de projetos na sessão) ---
+function saveCurrentProject() {
+    // Gera um id simples baseado em timestamp
+    const id = Date.now().toString();
+
+    const project = {
+        id,
+        name: state.projectName || 'Projeto sem nome',
+        data: state.data,
+        rawExcelData: state.rawExcelData
+    };
+
+    state.projects.push(project);
+    state.currentProjectId = id;
+
+    updateProjectSelect();
+}
+
+function updateProjectSelect() {
+    if (!elements.filterProjectTracker) return;
+
+    const select = elements.filterProjectTracker;
+    select.innerHTML = '';
+
+    state.projects.forEach(project => {
+        const opt = document.createElement('option');
+        opt.value = project.id;
+        opt.textContent = project.name.toUpperCase();
+        if (project.id === state.currentProjectId) {
+            opt.selected = true;
+        }
+        select.appendChild(opt);
+    });
+}
+
+function loadProjectIntoState(projectId) {
+    const project = state.projects.find(p => p.id === projectId);
+    if (!project) return;
+
+    state.currentProjectId = projectId;
+    state.projectName = project.name;
+    state.data = project.data;
+    state.rawExcelData = project.rawExcelData;
+
+    if (elements.headerProjectTitle) {
+        elements.headerProjectTitle.textContent = `PROJECT: ${state.projectName.toUpperCase()}`;
+    }
+
+    populateTransmissionFilter();
+    renderTracker();
+    renderTable();
+}
+
+// --- 3.3 Fluxos de navegação principais (reset / novo projeto) ---
+function resetToInitialState() {
+    // Limpa estado atual e lista de projetos (logout geral)
+    state.currentView = 'tracker';
+    state.projectName = '';
+    state.data = null;
+    state.rawExcelData = [];
+    state.projects = [];
+    state.currentProjectId = null;
+
+    // Limpa campos de entrada
+    if (elements.inputProjectName) {
+        elements.inputProjectName.value = '';
+    }
+    if (elements.fileInput) {
+        elements.fileInput.value = '';
+    }
+
+    // Reseta header
+    if (elements.headerProjectTitle) {
+        elements.headerProjectTitle.textContent = 'PROJECT: ...';
+    }
+
+    // Limpa select de projetos
+    if (elements.filterProjectTracker) {
+        elements.filterProjectTracker.innerHTML = '';
+    }
+
+    // Volta para tela inicial
+    if (elements.mainApp && elements.uploadView) {
+        elements.mainApp.classList.add('hidden');
+        elements.uploadView.classList.remove('hidden');
+    }
+}
+
+function goToNewProjectFlow() {
+    // Mantém a lista de projetos, mas reseta apenas o formulário para criar um novo
+    state.projectName = '';
+    state.data = null;
+    state.rawExcelData = [];
+
+    if (elements.inputProjectName) {
+        elements.inputProjectName.value = '';
+    }
+    if (elements.fileInput) {
+        elements.fileInput.value = '';
+    }
+
+    if (elements.mainApp && elements.uploadView) {
+        elements.mainApp.classList.add('hidden');
+        elements.uploadView.classList.remove('hidden');
+    }
+}
+
+// --- 3.4 Geração de fases mockadas ---
 function generatePhases(eng, pur, com, cons, man) {
     return [
         { name: "Engineering", plan: "04/02", actual: eng || "04/02" },
@@ -68,6 +202,7 @@ function generatePhases(eng, pur, com, cons, man) {
     ];
 }
 
+// --- 3.5 Determina a classe CSS do status (cor do ponto) ---
 function determineStatusClass(plan, actual) {
     // Se houver concatenação "|" (divergência), marca como vermelho ou alerta
     if (actual.toString().includes('|')) return 'dot-red'; 
@@ -76,9 +211,7 @@ function determineStatusClass(plan, actual) {
     return 'dot-blue';
 }
 
-/**
- * Converte as linhas do Excel no objeto de estado
- */
+// --- 3.6 Converte as linhas do Excel para o formato usado pela aplicação ---
 function parseExcelToState(rows) {
     if (rows.length < 2) return {};
 
@@ -253,8 +386,17 @@ function switchTab(tabName) {
 }
 
 function initEvents() {
-    // 1. Botão Buscar
-    elements.btnBrowse.addEventListener('click', () => elements.fileInput.click());
+
+    elements.btnBrowse.addEventListener('click', () => {
+        if(validateProjectName()) {
+            elements.fileInput.click();
+        }
+    });
+
+    elements.inputProjectName.addEventListener('input', (e) => {
+        state.projectName = e.target.value;
+    });
+
 
     // 2. Leitura do Arquivo Excel
     elements.fileInput.addEventListener('change', (e) => {
@@ -272,9 +414,12 @@ function initEvents() {
                 const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
                 
                 state.rawExcelData = jsonData;
-                
+
                 // Processa dados e trata divergências
                 state.data = parseExcelToState(jsonData);
+
+                // Salva projeto atual na lista de projetos
+                saveCurrentProject();
 
                 elements.btnBrowse.textContent = "Buscar Arquivo";
                 startApp();
@@ -289,7 +434,12 @@ function initEvents() {
 
     // 3. Botão Demo
     elements.btnDemo.addEventListener('click', () => {
+        // Cria um projeto demo usando os dados mockados
+        state.projectName = state.projectName || 'VW Patagônia (Demo)';
         state.data = MOCK_DATA;
+        state.rawExcelData = [];
+
+        saveCurrentProject();
         startApp();
     });
 
@@ -298,15 +448,33 @@ function initEvents() {
         item.addEventListener('click', () => switchTab(item.dataset.tab));
     });
 
-    // 5. Logout
-    elements.btnLogout.addEventListener('click', () => location.reload());
+    // 5. Novo Projeto
+    if (elements.btnNewProject) {
+        elements.btnNewProject.addEventListener('click', () => {
+            goToNewProjectFlow();
+        });
+    }
 
-    // 6. Filtros
+    // 6. Logout (volta para tela inicial e apaga projetos)
+    elements.btnLogout.addEventListener('click', () => {
+        resetToInitialState();
+    });
+
+    // 7. Filtros
     if (elements.filterStation) {
         elements.filterStation.addEventListener('change', renderTracker);
     }
+    
     if (elements.filterTransmission) {
         elements.filterTransmission.addEventListener('change', renderTracker);
+    }
+
+    // 8. Seleção de projetos no header (PROJECT: ...)
+    if (elements.filterProjectTracker) {
+        elements.filterProjectTracker.addEventListener('change', (e) => {
+            const projectId = e.target.value;
+            loadProjectIntoState(projectId);
+        });
     }
 }
 
@@ -328,6 +496,12 @@ function populateTransmissionFilter() {
 function startApp() {
     elements.uploadView.classList.add('hidden');
     elements.mainApp.classList.remove('hidden');
+
+    if (elements.headerProjectTitle && state.projectName) {
+        // .toUpperCase() transforma em maiúsculas (ex: "vw patagonia" -> "VW PATAGONIA")
+        elements.headerProjectTitle.textContent = `PROJECT: ${state.projectName.toUpperCase()}`;
+    }
+
     populateTransmissionFilter();
     renderTracker();
     renderTable();
