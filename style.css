@@ -82,6 +82,23 @@ body {
     margin: 0 auto 15px auto;
 }
 
+/* Logo responsivo na sidebar inicial */
+.logo-responsivo-inicio {
+    width: 60%;              /* ocupa boa parte da largura da sidebar */
+    max-width: 56px;         /* limite para telas grandes */
+    height: auto;            /* mantém proporção */
+    display: block;
+    margin: 0 auto 24px auto;/* centraliza e afasta dos ícones */
+}
+
+@media (max-width: 768px) {
+    .logo-responsivo-inicio {
+        width: 70%;
+        max-width: 48px;     /* um pouco menor em telas pequenas */
+        margin-bottom: 18px;
+    }
+}
+
 .brand-logo {
     font-weight: 900;
     font-size: 24px;

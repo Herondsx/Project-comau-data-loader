@@ -5,9 +5,16 @@
  * ============================================================================
  */
 
+import { renderSidebar } from './navBar.js'; // 1. Adicione a importação
+
+// ==============================================================
+
+
 // ==============================================================
 // 1. ESTADO E DADOS MOCKADOS
 // ==============================================================
+
+
 
 const state = {
     currentView: 'tracker',      // aba atual (tracker ou table)
@@ -57,7 +64,7 @@ function initDOMElements() {
         headerProjectTitle: document.getElementById('header-project-title'),
         filterTransmission: document.getElementById('filter-transmission-tracker'),
         filterProjectTracker: document.getElementById('filter-project-tracker'),
-        inputProjectName: document.getElementById('input-project-name')
+        inputProjectName: document.getElementById('input-project-name'),
     };
 }
 
@@ -409,8 +416,13 @@ function initEvents() {
         reader.onload = function(e) {
             try {
                 const data = new Uint8Array(e.target.result);
+
+
                 const workbook = XLSX.read(data, { type: 'array' });
+
+                //Abra o arquivo na primeira aba que encontrar
                 const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+
                 const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
                 
                 state.rawExcelData = jsonData;
@@ -513,5 +525,6 @@ function startApp() {
 
 document.addEventListener('DOMContentLoaded', () => {
     initDOMElements();
+    renderSidebar('sidebar'); 
     initEvents();
 });

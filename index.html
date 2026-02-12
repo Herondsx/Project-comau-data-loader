@@ -69,57 +69,9 @@
 
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
-            <div class="sidebar-logo-text">SIV</div>
-
-            <!-- Item 1: Tracker -->
-            <div class="sidebar-icon active" data-tab="tracker" title="Tracker Dashboard">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <rect x="3" y="3" width="7" height="7"></rect>
-                    <rect x="14" y="3" width="7" height="7"></rect>
-                    <rect x="14" y="14" width="7" height="7"></rect>
-                    <rect x="3" y="14" width="7" height="7"></rect>
-                </svg>
-                <span class="sidebar-label">Tracker</span>
-            </div>
-
-            <!-- Item 2: Materiais -->
-            <div class="sidebar-icon" data-tab="table" title="Lista de Materiais">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <line x1="8" y1="6" x2="21" y2="6"></line>
-                    <line x1="8" y1="12" x2="21" y2="12"></line>
-                    <line x1="8" y1="18" x2="21" y2="18"></line>
-                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
-                </svg>
-                <span class="sidebar-label">Materiais</span>
-            </div>
-
-            <div class="sidebar-icon" title="Novo Projeto" id="btn-new-project">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="9"></circle>
-                    <line x1="12" y1="8" x2="12" y2="16"></line>
-                    <line x1="8" y1="12" x2="16" y2="12"></line>
-                </svg>
-                <span class="sidebar-label">Novo Projeto</span>
-            </div>
-
-            <!-- Item 3: Sair -->
-            <div class="sidebar-icon mt-auto" title="Sair" id="btn-logout">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                    <polyline points="16 17 21 12 16 7"></polyline>
-                    <line x1="21" y1="12" x2="9" y2="12"></line>
-                </svg>
-                <span class="sidebar-label">Sair</span>
-            </div>
-
-        </aside>
-
+            <img src="logo-comau.png" alt="Logo da Comau" class="logo-responsivo-inicio">
+            </aside>
+            
         <!-- Conteúdo Principal -->
         <main class="main-content">
 
@@ -280,8 +232,8 @@
         </main>
     </div>
 
-    <!-- Script Principal -->
-    <script src="script.js"></script>
+    <!-- Script Principal (ES Modules para importar navBar.js) -->
+    <script type="module" src="script.js"></script>
 </body>
 
 </html>
