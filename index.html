@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PCP Manufacturing Dashboard</title>
-    
+    <title>Comau - PCP Manufacturing Dashboard</title>
+
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,9 +15,10 @@
 </head>
 <body>
 
+    <!-- ========== TELA DE UPLOAD ========== -->
     <div id="upload-view" class="upload-view">
         <div class="upload-card">
-            <div class="brand-logo">SIV-PCP</div>
+            <img src="logo-comau.png" alt="Comau" class="upload-logo">
             <h1 class="upload-title">PCP Manufacturing</h1>
             <p class="upload-subtitle">Controle de Fluxo e Prazos</p>
 
@@ -33,58 +34,79 @@
                         <line x1="12" y1="3" x2="12" y2="15"></line>
                     </svg>
                 </div>
-                <h3>Arraste a planilha "PCP MANUFACTURING" aqui</h3>
-                <p style="font-size:12px; color:#999; margin-top:5px">Suporta arquivos .XLSX</p>
+                <h3>Arraste a planilha aqui</h3>
+                <p class="dropzone-hint">ou clique no botao abaixo</p>
+                <p class="dropzone-formats">Suporta arquivos .XLSX e .XLSM</p>
                 <input type="file" id="file-input" accept=".xlsx, .xlsm" style="display: none;">
                 <button id="btn-browse" class="btn-primary" style="margin-top:15px">Buscar Arquivo</button>
             </div>
-            
+
             <div class="text-center">
                 <button id="btn-demo" class="btn-demo">Usar Dados de Exemplo</button>
+            </div>
+
+            <div class="upload-footer">
+                <span>Data Loader v1.0 Preview Alpha</span>
             </div>
         </div>
     </div>
 
+    <!-- ========== APP PRINCIPAL ========== -->
     <div id="main-app" class="app-container hidden">
 
-        <aside class="sidebar" id="sidebar"></aside>
+        <aside class="sidebar" id="sidebar">
+            <!-- Renderizado via JS -->
+        </aside>
 
         <main class="main-content">
 
             <header class="top-bar">
                 <div class="project-header-info">
-                    <h2 id="header-project-title">VISÃO GERAL</h2>
-                    <h1>FLUXO DE PRODUÇÃO</h1>
+                    <h2 id="header-project-title">VISAO GERAL</h2>
+                    <h1>FLUXO DE PRODUCAO</h1>
                 </div>
-                
-                <div class="header-filters">
-                    <select id="filter-client" class="header-select">
-                        <option value="all">Todos os Clientes</option>
-                    </select>
-                    <select id="filter-makebuy" class="header-select">
-                        <option value="all">Make & Buy</option>
-                        <option value="MAKE">Apenas MAKE</option>
-                        <option value="BUY">Apenas BUY</option>
-                    </select>
+
+                <div class="header-controls">
+                    <div class="search-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" id="search-input" placeholder="Buscar por ID, descricao, fornecedor...">
+                    </div>
+                    <div class="header-filters">
+                        <select id="filter-client" class="header-select">
+                            <option value="all">Todos os Clientes</option>
+                        </select>
+                        <select id="filter-makebuy" class="header-select">
+                            <option value="all">Make & Buy</option>
+                            <option value="MAKE">Apenas MAKE</option>
+                            <option value="BUY">Apenas BUY</option>
+                        </select>
+                    </div>
                 </div>
             </header>
 
             <div id="kpi-section" class="kpi-bar">
                 <div class="kpi-card">
-                    <div class="kpi-label">Horas disponíeveis</div>
+                    <div class="kpi-label">Total de Itens</div>
+                    <div class="kpi-value" id="kpi-items">0</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Horas disponiveis</div>
                     <div class="kpi-value" id="kpi-hours">0h</div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-label">Orçamento planejado</div>
+                    <div class="kpi-label">Orcamento planejado</div>
                     <div class="kpi-value" id="kpi-value">R$ 0</div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-label">Itens em atrasoS</div>
+                    <div class="kpi-label">Itens em atraso</div>
                     <div class="kpi-value text-red" id="kpi-risk">0</div>
                 </div>
                 <div class="kpi-card">
                     <div class="kpi-label" style="display: flex; align-items: center; gap: 5px;">
-                        Eficiência Fluxo
+                        Eficiencia Fluxo
                         <div class="tooltip-container">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tooltip-icon">
                                 <circle cx="12" cy="12" r="10"></circle>
@@ -92,8 +114,8 @@
                                 <line x1="12" y1="17" x2="12.01" y2="17"></line>
                             </svg>
                             <div class="tooltip-text">
-                                <strong>Como é calculado?</strong><br>
-                                É a soma do progresso das 6 etapas (3D, Mat, Min, Bordo, Mont, Qual) de todos os itens listados, dividida pela pontuação máxima possível. Cada etapa concluída vale 1 ponto.
+                                <strong>Como e calculado?</strong><br>
+                                E a soma do progresso das 6 etapas (3D, Mat, Min, Bordo, Mont, Qual) de todos os itens listados, dividida pela pontuacao maxima possivel. Cada etapa concluida vale 1 ponto.
                             </div>
                         </div>
                     </div>
@@ -102,23 +124,42 @@
                 </div>
             </div>
 
+            <!-- DASHBOARD VIEW -->
             <div id="view-tracker" class="view-section content-scroll">
-                <div id="tracker-content-area" class="cards-wrapper">
-                    </div>
+                <div class="view-header">
+                    <span class="item-count" id="item-count">0 itens</span>
+                </div>
+                <div id="tracker-content-area" class="cards-wrapper"></div>
+                <div id="empty-state" class="empty-state hidden">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <h3>Nenhum item encontrado</h3>
+                    <p>Tente ajustar os filtros ou a busca.</p>
+                </div>
             </div>
 
+            <!-- TABLE VIEW -->
             <div id="view-table" class="view-section hidden generic-padding">
-                <h2 class="section-title">Lista Tabular Detalhada</h2>
+                <div class="table-header-row">
+                    <h2 class="section-title">Lista Tabular Detalhada</h2>
+                    <span class="item-count" id="table-item-count">0 itens</span>
+                </div>
                 <div class="table-container">
-                    <table class="data-table">
+                    <table class="data-table" id="data-table">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Transmissão</th>
-                                <th>Operação</th>
-                                <th>Fornecedor</th>
-                                <th>Entrega Prevista</th>
-                                <th>Status</th>
+                                <th data-sort="id">ID <span class="sort-icon"></span></th>
+                                <th data-sort="client">Cliente <span class="sort-icon"></span></th>
+                                <th data-sort="transmission">Transmissao <span class="sort-icon"></span></th>
+                                <th data-sort="op">Operacao <span class="sort-icon"></span></th>
+                                <th data-sort="desc">Descricao <span class="sort-icon"></span></th>
+                                <th data-sort="makeBuy">Make/Buy <span class="sort-icon"></span></th>
+                                <th data-sort="supplier">Fornecedor <span class="sort-icon"></span></th>
+                                <th data-sort="dateSupplier">Entrega Fornecedor <span class="sort-icon"></span></th>
+                                <th data-sort="dateFinal">Entrega Final <span class="sort-icon"></span></th>
+                                <th>Pipeline</th>
+                                <th data-sort="status">Status <span class="sort-icon"></span></th>
                             </tr>
                         </thead>
                         <tbody id="table-body"></tbody>
