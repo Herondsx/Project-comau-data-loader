@@ -1,48 +1,55 @@
-/**
- * ============================================================================
- * SIV-SITE - Sistema de Integração e Visualização de Projetos
- * Módulo: Tracker Dashboard (PowerPoint Style)
- * ============================================================================
- */
+// ===========================================
+// 1. CONFIGURAÇÃO DO MENU LATERAL
+// ===========================================
+const menuItems = [
+    {
+        label: "Dashboard",
+        dataTab: "tracker",
+        active: true,
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>`
+    },
+    {
+        label: "Lista",
+        dataTab: "table",
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>`
+    },
+    {
+        label: "Sair",
+        id: "btn-logout",
+        extraClass: "mt-auto",
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`
+    }
+];
 
-import { renderSidebar } from './navBar.js'; // 1. Adicione a importação
+function renderSidebar() {
+    const container = document.getElementById('sidebar');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    menuItems.forEach(item => {
+        const div = document.createElement('div');
+        let classes = 'sidebar-icon';
+        if (item.active) classes += ' active';
+        if (item.extraClass) classes += ` ${item.extraClass}`;
+        div.className = classes;
 
-// ==============================================================
+        if (item.id) div.id = item.id;
+        if (item.dataTab) div.setAttribute('data-tab', item.dataTab);
 
+        div.innerHTML = `${item.icon}<span style="margin-top:2px">${item.label}</span>`;
+        container.appendChild(div);
+    });
+}
 
-// ==============================================================
-// 1. ESTADO E DADOS MOCKADOS
-// ==============================================================
-
-
+// ===========================================
+// 2. LÓGICA PRINCIPAL (SCRIPT.JS INTEGRADO)
+// ===========================================
 
 const state = {
-    currentView: 'tracker',      // aba atual (tracker ou table)
-    projectName: '',             // nome do projeto digitado na tela inicial
-    filters: {
-        line: 'AUFBAU',
-        station: 'all'
-    },
-    data: null,                  // dados processados do Excel do projeto atual
-    rawExcelData: [],            // conteúdo bruto do Excel (array de linhas) do projeto atual
-    projects: [],                // lista de projetos criados na sessão
-    currentProjectId: null       // id do projeto atualmente selecionado
+    pcpData: [],
+    filters: { client: 'all', makeBuy: 'all' }
 };
 
-// Dados de demonstração usados no modo "Demo"
-const MOCK_DATA = {
-    "OP20": [
-        { id: "XXXX-XXXX-0003-2026", phases: generatePhases("04/02", "04/02", "04/02", "08/02", "10/02") },
-        { id: "XXXX-XXXX-0004-2026", phases: generatePhases("04/02", "04/02", "04/02", "04/02", "04/02") }
-    ],
-    "OP10": [
-        { id: "XXXX-XXXX-0001-2026", phases: generatePhases("04/02", "08/02", "04/02", "04/02", "04/02") }
-    ]
-};
-
-// ==============================================================
-// 2. REFERÊNCIAS DO DOM
-// ==============================================================
 let elements = {};
 
 function initDOMElements() {
@@ -53,478 +60,370 @@ function initDOMElements() {
         viewTable: document.getElementById('view-table'),
         trackerContent: document.getElementById('tracker-content-area'),
         tableBody: document.getElementById('table-body'),
-        btnBrowse: document.getElementById('btn-browse'),
         fileInput: document.getElementById('file-input'),
-        dropzone: document.getElementById('dropzone'),
+        btnBrowse: document.getElementById('btn-browse'),
         btnDemo: document.getElementById('btn-demo'),
-        btnNewProject: document.getElementById('btn-new-project'),
-        btnLogout: document.getElementById('btn-logout'),
-        navItems: document.querySelectorAll('.sidebar-icon[data-tab]'),
-        filterStation: document.getElementById('filter-station-tracker'),
-        headerProjectTitle: document.getElementById('header-project-title'),
-        filterTransmission: document.getElementById('filter-transmission-tracker'),
-        filterProjectTracker: document.getElementById('filter-project-tracker'),
-        inputProjectName: document.getElementById('input-project-name'),
+        inputProject: document.getElementById('input-project-name'),
+        headerTitle: document.getElementById('header-project-title'),
+        kpiHours: document.getElementById('kpi-hours'),
+        kpiValue: document.getElementById('kpi-value'),
+        kpiRisk: document.getElementById('kpi-risk'),
+        kpiEfficiency: document.getElementById('kpi-efficiency'),
+        filterClient: document.getElementById('filter-client'),
+        filterMakeBuy: document.getElementById('filter-makebuy')
     };
 }
 
-// ==============================================================
-// 3. FUNÇÕES AUXILIARES DE DADOS
-//    - Validações
-//    - Transformações de dados
-//    - Cálculo de status
-// ==============================================================
-
-// --- 3.1 Validação de entrada ---
-function validateProjectName() {
-    // Pega o valor e remove espaços extras
-    const name = elements.inputProjectName.value.trim();
-
-    if (!name) {
-        alert("⚠️ Por favor, digite o NOME DO PROJETO antes de continuar.");
-        elements.inputProjectName.focus(); // Coloca o cursor no campo
-        return false;
+// --- PARSING DE DADOS (LÊ O EXCEL) ---
+function parseExcelData(rows) {
+    let headerRowIndex = -1;
+    // Procura linha que contenha 'ID'
+    for (let i = 0; i < Math.min(rows.length, 30); i++) {
+        const row = rows[i];
+        if (row && row.some(cell => cell && typeof cell === 'string' && cell.trim().toUpperCase() === 'ID')) {
+            headerRowIndex = i;
+            break;
+        }
     }
 
-    state.projectName = name;
-    return true;
-}
+    if (headerRowIndex === -1) {
+        alert("Não encontrei o cabeçalho 'ID' na planilha.");
+        return [];
+    }
 
-// --- 3.2 Gestão de projetos (lista de projetos na sessão) ---
-function saveCurrentProject() {
-    // Gera um id simples baseado em timestamp
-    const id = Date.now().toString();
+    const headers = rows[headerRowIndex].map(h => (h ? h.toString().trim().toLowerCase() : ''));
+    
+    // Mapeamento de colunas
+const colMap = {
+    id: headers.indexOf('id'),
+    client: headers.indexOf('cliente'),
+    project: headers.indexOf('projeto'),
+    op: headers.indexOf('operação'),
+    desc: headers.indexOf('descrição'),
+    makeBuy: headers.findIndex(h => h.includes('make')),
+    supplier: headers.indexOf('fornecedor'),
+    transmission: headers.indexOf('transmissão'), // <-- NOVA LINHA AQUI
+    dateSupplier: headers.findIndex(h => h.includes('entrega') && h.includes('fornecedor')),
+    dateFinal: headers.findIndex(h => h.includes('entrega') && h.includes('final')),
+    hours: headers.findIndex(h => h.includes('quantd') || h.includes('horas')),
+    value: headers.findIndex(h => h.includes('valor mo')),
+    // Pipeline
+    dim3d: headers.findIndex(h => h.includes('3d') || h.includes('matematica')),
+    minuteria: headers.findIndex(h => h.includes('minuteria')),
+    material: headers.findIndex(h => h.includes('material') && h.includes('construtivo')),
+    bordo: headers.findIndex(h => h.includes('bordo')),
+    montagem: headers.findIndex(h => h.includes('montagem') && h.includes('mecânica')),
+    qualidade: headers.findIndex(h => h.includes('inspeção') || h.includes('qualidade'))
+};
 
-    const project = {
-        id,
-        name: state.projectName || 'Projeto sem nome',
-        data: state.data,
-        rawExcelData: state.rawExcelData
+    // ... (código anterior da função parseExcelData)
+
+const processedData = [];
+
+for (let i = headerRowIndex + 1; i < rows.length; i++) {
+    const row = rows[i];
+    
+    // 1. Verifica se a linha existe e tem o ID preenchido
+    if (!row || !row[colMap.id]) continue;
+
+// ==========================================
+    // NOVA REGRA: Ignorar se tiver APENAS o ID e/ou Zeros (Horas = 0)
+    // ==========================================
+    let hasOtherData = false;
+    
+    // Varre todas as colunas mapeadas (exceto o 'id')
+    for (const key in colMap) {
+        if (key !== 'id') {
+            const colIndex = colMap[key];
+            const cellValue = row[colIndex];
+            
+            // Verifica se a célula não é nula/indefinida
+            if (colIndex !== -1 && cellValue !== undefined && cellValue !== null && cellValue !== '') {
+                
+                // Trata strings com espaços vazios
+                if (typeof cellValue === 'string' && cellValue.trim() === '') {
+                    continue;
+                }
+
+                // Se o conteúdo for apenas um zero (ex: Horas = 0), ignoramos e continuamos procurando
+                if (cellValue === 0 || cellValue === '0' || cellValue === '0%') {
+                    continue;
+                }
+                
+                // Se chegou aqui, achou algum texto de verdade, data ou número maior que zero!
+                hasOtherData = true;
+                break; 
+            }
+        }
+    }
+
+    // Se passou por todas as colunas e não achou nada além do ID (ou apenas zeros nas horas), pula para a próxima linha
+    if (!hasOtherData) continue;
+    // ==========================================
+
+    const parseDate = (val) => {
+        if (!val) return null;
+        if (typeof val === 'number') {
+            return new Date(Math.round((val - 25569) * 86400 * 1000));
+        }
+        return new Date(val);
     };
 
-    state.projects.push(project);
-    state.currentProjectId = id;
+    const dtSup = parseDate(row[colMap.dateSupplier]);
+    const dtFin = parseDate(row[colMap.dateFinal]);
 
-    updateProjectSelect();
+    const item = {
+        id: row[colMap.id],
+        client: row[colMap.client] || 'Geral',
+        project: row[colMap.project] || '-',
+        op: row[colMap.op] || '-',
+        desc: row[colMap.desc] || 'Sem descrição',
+        makeBuy: (row[colMap.makeBuy] || 'MAKE').toUpperCase(),
+        supplier: row[colMap.supplier] || 'Interno',
+        transmission: row[colMap.transmission] || '-', // <-- NOVA LINHA AQUI
+        dateSupplier: dtSup,
+        dateFinal: dtFin,
+        hours: parseFloat(row[colMap.hours]) || 0,
+        value: parseFloat(row[colMap.value]) || 0,
+        pipeline: {
+            dim3d: parseFloat(row[colMap.dim3d]) || 0,
+            material: parseFloat(row[colMap.material]) || 0,
+            minuteria: parseFloat(row[colMap.minuteria]) || 0,
+            bordo: parseFloat(row[colMap.bordo]) || 0,
+            montagem: parseFloat(row[colMap.montagem]) || 0,
+            qualidade: parseFloat(row[colMap.qualidade]) || 0
+        }
+    };
+        processedData.push(item);
+}
+return processedData;
 }
 
-function updateProjectSelect() {
-    if (!elements.filterProjectTracker) return;
+// --- RENDERIZAÇÃO ---
+function renderDashboard() {
+    const container = elements.trackerContent;
+    container.innerHTML = '';
 
-    const select = elements.filterProjectTracker;
-    select.innerHTML = '';
+    let filtered = state.pcpData;
+    const clientFilter = elements.filterClient.value;
+    const typeFilter = elements.filterMakeBuy.value;
 
-    state.projects.forEach(project => {
-        const opt = document.createElement('option');
-        opt.value = project.id;
-        opt.textContent = project.name.toUpperCase();
-        if (project.id === state.currentProjectId) {
-            opt.selected = true;
+    if (clientFilter !== 'all') filtered = filtered.filter(i => i.client === clientFilter);
+    if (typeFilter !== 'all') filtered = filtered.filter(i => i.makeBuy.includes(typeFilter));
+
+    updateKPIs(filtered);
+
+    filtered.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'item-card';
+
+        // Lógica Risco
+        let isRisk = false;
+        if (item.dateSupplier && item.dateFinal) {
+            isRisk = item.dateSupplier > item.dateFinal;
         }
-        select.appendChild(opt);
+        
+        const statusLabel = isRisk ? 'ATRASO' : 'NO PRAZO';
+        const statusClass = isRisk ? 'st-risk' : 'st-ok';
+        const mbClass = item.makeBuy.includes('MAKE') ? 'badge-make' : 'badge-buy';
+        const fmtDate = (d) => d ? d.toLocaleDateString('pt-BR') : '-';
+        
+        // Pipeline Cores
+        const segClass = (val) => {
+            if (val >= 1) return 'seg-complete';
+            if (val > 0) return 'seg-partial';
+            return 'seg-empty';
+        };
+        
+        // Tooltip %
+        const percent = (val) => (val * 100).toFixed(0) + '%';
+        card.innerHTML = `
+        <div class="card-info">
+            <h3>${item.id}</h3>
+            
+            <div style="font-size: 12px; color: #666; font-weight: 600; margin-bottom: 4px;">
+                Transmissão: ${item.transmission} <span style="font-weight:400">| OP: ${item.op}</span>
+            </div>
+            
+            <span class="desc" title="${item.desc}">${item.desc}</span>
+            <div class="badges">
+                <span class="badge ${mbClass}">${item.makeBuy}</span>
+                <span class="badge badge-client">${item.client}</span>
+            </div>
+        </div>
+
+            <div class="pipeline-container">
+                <div class="pipeline-track">
+                    <div class="pipeline-segment ${segClass(item.pipeline.dim3d)}" title="3D: ${percent(item.pipeline.dim3d)}"></div>
+                    <div class="pipeline-segment ${segClass(item.pipeline.material)}" title="Material: ${percent(item.pipeline.material)}"></div>
+                    <div class="pipeline-segment ${segClass(item.pipeline.minuteria)}" title="Minuteria: ${percent(item.pipeline.minuteria)}"></div>
+                    <div class="pipeline-segment ${segClass(item.pipeline.bordo)}" title="Bordo: ${percent(item.pipeline.bordo)}"></div>
+                    <div class="pipeline-segment ${segClass(item.pipeline.montagem)}" title="Montagem: ${percent(item.pipeline.montagem)}"></div>
+                    <div class="pipeline-segment ${segClass(item.pipeline.qualidade)}" title="Qualidade: ${percent(item.pipeline.qualidade)}"></div>
+                </div>
+                <div class="pipeline-legend">
+                    <span>3D</span><span>Mat.</span><span>Min.</span><span>Bordo</span><span>Mont.</span><span>Qual.</span>
+                </div>
+            </div>
+
+            <div class="card-dates">
+                <div class="date-row">
+                    <span class="date-label">Data de Entrega Final:</span>
+                    <span class="date-val">${fmtDate(item.dateFinal)}</span>
+                </div>
+                <div class="date-row">
+                    <span class="date-label">Data de Entrega Fornecedor:</span>
+                    <span class="date-val" style="${isRisk ? 'color:red' : ''}">${fmtDate(item.dateSupplier)}</span>
+                </div>
+                <span class="status-pill ${statusClass}">${statusLabel}</span>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+
+    renderTable(filtered);
+}
+
+function updateKPIs(data) {
+    const totalHours = data.reduce((acc, i) => acc + i.hours, 0);
+    elements.kpiHours.textContent = Math.round(totalHours).toLocaleString('pt-BR') + 'h';
+
+    const totalVal = data.reduce((acc, i) => acc + i.value, 0);
+    elements.kpiValue.textContent = totalVal.toLocaleString('pt-BR', {style:'currency', currency:'BRL', maximumFractionDigits:0});
+
+    const risks = data.filter(i => i.dateSupplier && i.dateFinal && i.dateSupplier > i.dateFinal).length;
+    elements.kpiRisk.textContent = risks;
+
+    let totalScore = 0;
+    const maxScore = data.length * 6;
+    if (data.length === 0) {
+        elements.kpiEfficiency.textContent = "0%";
+        return;
+    }
+    data.forEach(i => {
+        const p = i.pipeline;
+        totalScore += (p.dim3d + p.material + p.minuteria + p.bordo + p.montagem + p.qualidade);
+    });
+    const eff = (totalScore / maxScore) * 100;
+    elements.kpiEfficiency.textContent = eff.toFixed(1) + '%';
+}
+
+function renderTable(data) {
+    const tbody = elements.tableBody;
+    tbody.innerHTML = '';
+    
+    data.forEach(item => {
+        const tr = document.createElement('tr');
+        const fmtDate = (d) => d ? d.toLocaleDateString('pt-BR') : '-';
+        const isRisk = item.dateSupplier && item.dateFinal && item.dateSupplier > item.dateFinal;
+        
+        tr.innerHTML = `
+            <td>${item.id}</td>
+            <td>${item.transmission}</td> <td>${item.op}</td>
+            <td>${item.supplier}</td>
+            <td>${fmtDate(item.dateSupplier)}</td>
+            <td style="color:${isRisk?'red':'green'}; font-weight:bold">${isRisk ? 'Atraso' : 'Ok'}</td>
+        `;
+        tbody.appendChild(tr);
     });
 }
 
-function loadProjectIntoState(projectId) {
-    const project = state.projects.find(p => p.id === projectId);
-    if (!project) return;
-
-    state.currentProjectId = projectId;
-    state.projectName = project.name;
-    state.data = project.data;
-    state.rawExcelData = project.rawExcelData;
-
-    if (elements.headerProjectTitle) {
-        elements.headerProjectTitle.textContent = `PROJECT: ${state.projectName.toUpperCase()}`;
-    }
-
-    populateTransmissionFilter();
-    renderTracker();
-    renderTable();
-}
-
-// --- 3.3 Fluxos de navegação principais (reset / novo projeto) ---
-function resetToInitialState() {
-    // Limpa estado atual e lista de projetos (logout geral)
-    state.currentView = 'tracker';
-    state.projectName = '';
-    state.data = null;
-    state.rawExcelData = [];
-    state.projects = [];
-    state.currentProjectId = null;
-
-    // Limpa campos de entrada
-    if (elements.inputProjectName) {
-        elements.inputProjectName.value = '';
-    }
-    if (elements.fileInput) {
-        elements.fileInput.value = '';
-    }
-
-    // Reseta header
-    if (elements.headerProjectTitle) {
-        elements.headerProjectTitle.textContent = 'PROJECT: ...';
-    }
-
-    // Limpa select de projetos
-    if (elements.filterProjectTracker) {
-        elements.filterProjectTracker.innerHTML = '';
-    }
-
-    // Volta para tela inicial
-    if (elements.mainApp && elements.uploadView) {
-        elements.mainApp.classList.add('hidden');
-        elements.uploadView.classList.remove('hidden');
-    }
-}
-
-function goToNewProjectFlow() {
-    // Mantém a lista de projetos, mas reseta apenas o formulário para criar um novo
-    state.projectName = '';
-    state.data = null;
-    state.rawExcelData = [];
-
-    if (elements.inputProjectName) {
-        elements.inputProjectName.value = '';
-    }
-    if (elements.fileInput) {
-        elements.fileInput.value = '';
-    }
-
-    if (elements.mainApp && elements.uploadView) {
-        elements.mainApp.classList.add('hidden');
-        elements.uploadView.classList.remove('hidden');
-    }
-}
-
-// --- 3.4 Geração de fases mockadas ---
-function generatePhases(eng, pur, com, cons, man) {
-    return [
-        { name: "Engineering", plan: "04/02", actual: eng || "04/02" },
-        { name: "Purchasing", plan: "04/02", actual: pur || "04/02" },
-        { name: "Commercial", plan: "04/02", actual: com || "04/02" },
-        { name: "Constructives", plan: "04/02", actual: cons || "04/02" },
-        { name: "Manufacturing", plan: "04/02", actual: man || "04/02" },
-        { name: "Delivery", plan: "04/02", actual: "04/02" }
-    ];
-}
-
-// --- 3.5 Determina a classe CSS do status (cor do ponto) ---
-function determineStatusClass(plan, actual) {
-    // Se houver concatenação "|" (divergência), marca como vermelho ou alerta
-    if (actual.toString().includes('|')) return 'dot-red'; 
-    if (plan === actual) return 'dot-green';
-    if (actual > plan) return 'dot-red'; 
-    return 'dot-blue';
-}
-
-// --- 3.6 Converte as linhas do Excel para o formato usado pela aplicação ---
-function parseExcelToState(rows) {
-    if (rows.length < 2) return {};
-
-    // --- CONFIGURAÇÃO DE COLUNAS (Ajuste conforme seu Excel) ---
-    // 0 = Coluna A, 1 = Coluna B, etc.
-    const COL_STATION = 0; 
-    const COL_ID = 1;      
-    const COL_PHASE = 2;   
-    const COL_PLAN = 3;    
-    const COL_ACTUAL = 4;  
-
-    const result = {};
-    const conflicts = [];
-
-    // Começa do 1 para pular o cabeçalho
-    for (let i = 1; i < rows.length; i++) {
-        const row = rows[i];
-        if (!row[COL_ID]) continue; // Pula linhas sem ID
-
-        const station = row[COL_STATION] || "Sem Estação";
-        const id = row[COL_ID];
-        const phaseName = row[COL_PHASE];
-        const plan = row[COL_PLAN] || "-";
-        const actual = row[COL_ACTUAL] || "-";
-
-        if (!result[station]) result[station] = [];
-
-        // Verifica se o ID já existe na estação
-        let transmission = result[station].find(t => t.id === id);
-        if (!transmission) {
-            transmission = { id: id, phases: [] };
-            result[station].push(transmission);
+// --- FILTROS E EVENTOS ---
+function populateFilters() {
+    const clients = [...new Set(state.pcpData.map(i => i.client))].sort();
+    elements.filterClient.innerHTML = '<option value="all">Todos os Clientes</option>';
+    clients.forEach(c => {
+        if(c && c !== 'Geral') {
+            const opt = document.createElement('option');
+            opt.value = c; opt.textContent = c;
+            elements.filterClient.appendChild(opt);
         }
-
-        // Verifica se a fase já existe (Divergência)
-        let phase = transmission.phases.find(p => p.name === phaseName);
-        if (phase) {
-            if (phase.plan !== plan || phase.actual !== actual) {
-                conflicts.push(`Divergência: ID ${id} - ${phaseName}`);
-                // Concatena as informações divergentes
-                phase.plan = `${phase.plan} | ${plan}`;
-                phase.actual = `${phase.actual} | ${actual}`;
-            }
-        } else {
-            transmission.phases.push({ name: phaseName, plan, actual });
-        }
-    }
-
-    if (conflicts.length > 0) {
-        alert("⚠️ Divergências processadas:\n" + conflicts.slice(0,5).join("\n") + (conflicts.length > 5 ? "\n..." : ""));
-    }
-    return result;
-}
-
-// ==============================================================
-// 4. LÓGICA DE RENDERIZAÇÃO
-// ==============================================================
-
-function renderTracker() {
-    const container = elements.trackerContent;
-    if (!container) return;
-    container.innerHTML = '';
-    
-    const stationFilter = elements.filterStation ? elements.filterStation.value : 'all';
-    const transFilter = elements.filterTransmission ? elements.filterTransmission.value : 'all';
-    const dataToRender = state.data || MOCK_DATA;
-
-    for (const [station, items] of Object.entries(dataToRender)) {
-        if (stationFilter !== 'all' && station !== stationFilter) continue;
-        
-        const filteredItems = items.filter(item => {
-            return transFilter === 'all' || item.id === transFilter;
-        });
-
-        if (filteredItems.length === 0) continue;
-
-        const section = document.createElement('div');
-        section.className = 'station-section';
-        
-        // CORREÇÃO: Estava 'di   '
-        const title = document.createElement('div'); 
-        title.className = 'station-title';
-        title.textContent = station;
-        section.appendChild(title);
-
-        const cardsContainer = document.createElement('div');
-        cardsContainer.className = 'cards-container';
-
-        filteredItems.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'tracker-card';
-            
-            // Monta o HTML do card
-            let phasesHTML = '';
-            item.phases.forEach(phase => {
-                const statusClass = determineStatusClass(phase.plan, phase.actual);
-                phasesHTML += `
-                    <div class="phase-row">
-                        <div class="phase-name">${phase.name}</div>
-                        <div class="phase-date">${phase.plan}</div>
-                        <div class="phase-date">${phase.actual}</div>
-                        <div class="phase-status"><span class="status-dot ${statusClass}"></span></div>
-                    </div>
-                `;
-            });
-
-            card.innerHTML = `
-                <div class="card-header">
-                    <span>${item.id}</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2">
-                        <circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle>
-                    </svg>
-                </div>
-                <div class="card-body">
-                    <div class="phase-grid">
-                        <div class="grid-header text-left">Phase</div>
-                        <div class="grid-header">Plan</div>
-                        <div class="grid-header">Actual</div>
-                        <div class="grid-header">Status</div>
-                        ${phasesHTML}
-                    </div>
-                </div>
-            `;
-            cardsContainer.appendChild(card);
-        });
-
-        section.appendChild(cardsContainer);
-        container.appendChild(section);
-    }
-}
-
-function renderTable() {
-    const tbody = elements.tableBody;
-    if (!tbody) return;
-    tbody.innerHTML = '';
-    
-    const dataToRender = state.data || MOCK_DATA;
-
-    for (const [station, items] of Object.entries(dataToRender)) {
-        items.forEach(item => {
-            item.phases.forEach(phase => {
-                const statusDot = determineStatusClass(phase.plan, phase.actual);
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${station}</td>
-                    <td>${item.id}</td>
-                    <td>${phase.name}</td>
-                    <td>${phase.plan}</td>
-                    <td>${phase.actual}</td>
-                    <td><span class="status-dot ${statusDot}"></span></td>
-                `;
-                tbody.appendChild(row);
-            });
-        });
-    }
-}
-
-// ==============================================================
-// 5. NAVEGAÇÃO E EVENTOS
-// ==============================================================
-
-function switchTab(tabName) {
-    elements.viewTracker.classList.add('hidden');
-    elements.viewTable.classList.add('hidden');
-    elements.navItems.forEach(el => el.classList.remove('active'));
-    
-    const activeIcon = document.querySelector(`.sidebar-icon[data-tab="${tabName}"]`);
-    if(activeIcon) activeIcon.classList.add('active');
-
-    if(tabName === 'tracker') elements.viewTracker.classList.remove('hidden');
-    else if (tabName === 'table') elements.viewTable.classList.remove('hidden');
+    });
 }
 
 function initEvents() {
-
-    elements.btnBrowse.addEventListener('click', () => {
-        if(validateProjectName()) {
-            elements.fileInput.click();
-        }
-    });
-
-    elements.inputProjectName.addEventListener('input', (e) => {
-        state.projectName = e.target.value;
-    });
-
-
-    // 2. Leitura do Arquivo Excel
+    // Upload
+    elements.btnBrowse.addEventListener('click', () => elements.fileInput.click());
+    
     elements.fileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        elements.btnBrowse.textContent = "Lendo arquivo...";
+        elements.btnBrowse.textContent = "Processando...";
         const reader = new FileReader();
 
         reader.onload = function(e) {
-            try {
-                const data = new Uint8Array(e.target.result);
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            
+            let sheetName = workbook.SheetNames.find(n => n.toUpperCase().includes('PCP'));
+            if (!sheetName) sheetName = workbook.SheetNames[0];
 
+            const worksheet = workbook.Sheets[sheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-                const workbook = XLSX.read(data, { type: 'array' });
-
-                //Abra o arquivo na primeira aba que encontrar
-                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-
-                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                
-                state.rawExcelData = jsonData;
-
-                // Processa dados e trata divergências
-                state.data = parseExcelToState(jsonData);
-
-                // Salva projeto atual na lista de projetos
-                saveCurrentProject();
-
-                elements.btnBrowse.textContent = "Buscar Arquivo";
-                startApp();
-            } catch (error) {
-                console.error(error);
-                alert("Erro ao ler o arquivo.");
-                elements.btnBrowse.textContent = "Buscar Arquivo";
-            }
+            state.pcpData = parseExcelData(jsonData);
+            
+            elements.uploadView.classList.add('hidden');
+            elements.mainApp.classList.remove('hidden');
+            if(elements.inputProject.value) elements.headerTitle.textContent = elements.inputProject.value.toUpperCase();
+            
+            populateFilters();
+            renderDashboard();
         };
         reader.readAsArrayBuffer(file);
     });
 
-    // 3. Botão Demo
+    // Demo
     elements.btnDemo.addEventListener('click', () => {
-        // Cria um projeto demo usando os dados mockados
-        state.projectName = state.projectName || 'VW Patagônia (Demo)';
-        state.data = MOCK_DATA;
-        state.rawExcelData = [];
-
-        saveCurrentProject();
-        startApp();
+        state.pcpData = generateMockData();
+        elements.uploadView.classList.add('hidden');
+        elements.mainApp.classList.remove('hidden');
+        populateFilters();
+        renderDashboard();
     });
 
-    // 4. Navegação
-    elements.navItems.forEach(item => {
-        item.addEventListener('click', () => switchTab(item.dataset.tab));
-    });
+    // Filters
+    elements.filterClient.addEventListener('change', renderDashboard);
+    elements.filterMakeBuy.addEventListener('change', renderDashboard);
 
-    // 5. Novo Projeto
-    if (elements.btnNewProject) {
-        elements.btnNewProject.addEventListener('click', () => {
-            goToNewProjectFlow();
+    // Navigation
+    const navItems = document.querySelectorAll('.sidebar-icon[data-tab]');
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            navItems.forEach(n => n.classList.remove('active'));
+            item.classList.add('active');
+            
+            const tab = item.dataset.tab;
+            if (tab === 'tracker') {
+                elements.viewTracker.classList.remove('hidden');
+                elements.viewTable.classList.add('hidden');
+                document.getElementById('kpi-section').classList.remove('hidden');
+            } else {
+                elements.viewTracker.classList.add('hidden');
+                elements.viewTable.classList.remove('hidden');
+                document.getElementById('kpi-section').classList.add('hidden');
+            }
         });
-    }
-
-    // 6. Logout (volta para tela inicial e apaga projetos)
-    elements.btnLogout.addEventListener('click', () => {
-        resetToInitialState();
     });
-
-    // 7. Filtros
-    if (elements.filterStation) {
-        elements.filterStation.addEventListener('change', renderTracker);
-    }
     
-    if (elements.filterTransmission) {
-        elements.filterTransmission.addEventListener('change', renderTracker);
-    }
-
-    // 8. Seleção de projetos no header (PROJECT: ...)
-    if (elements.filterProjectTracker) {
-        elements.filterProjectTracker.addEventListener('change', (e) => {
-            const projectId = e.target.value;
-            loadProjectIntoState(projectId);
-        });
-    }
+    // Logout
+    document.getElementById('btn-logout')?.addEventListener('click', () => location.reload());
 }
 
-function populateTransmissionFilter() {
-    if(!elements.filterTransmission || !state.data) return;
-    let allIds = [];
-    Object.values(state.data).forEach(items => {
-        items.forEach(i => allIds.push(i.id));
-    });
-    allIds = [...new Set(allIds)];
-    elements.filterTransmission.innerHTML = '<option value="all">Todas</option>';
-    allIds.forEach(id => {
-        const opt = document.createElement('option');
-        opt.value = id; opt.textContent = id;
-        elements.filterTransmission.appendChild(opt);
-    });
+function generateMockData() {
+    // Dados simulados baseados no seu Excel
+    return [
+        { id: "2018", client: "RENAULT", op: "BM030", desc: "GRIPPER - LABOR - REALY", makeBuy: "MAKE", dateSupplier: new Date("2025-12-10"), dateFinal: new Date("2025-10-17"), hours: 149, value: 12000, pipeline: { dim3d: 1, material: 1, minuteria: 1, bordo: 0.5, montagem: 0, qualidade: 0 } },
+        { id: "2019", client: "RENAULT", op: "BM030", desc: "GRIPPER - CONJ SUPERIOR", makeBuy: "MAKE", dateSupplier: new Date("2025-12-19"), dateFinal: new Date("2026-01-20"), hours: 165, value: 14000, pipeline: { dim3d: 1, material: 1, minuteria: 0.9, bordo: 0.75, montagem: 0.2, qualidade: 0 } },
+        { id: "2501", client: "STL", op: "OP10", desc: "Fabricação SM-PA012-SM-2025", makeBuy: "BUY", dateSupplier: new Date("2025-12-29"), dateFinal: new Date("2025-12-31"), hours: 37, value: 3100, pipeline: { dim3d: 1, material: 1, minuteria: 1, bordo: 1, montagem: 1, qualidade: 0.5 } },
+        { id: "2604", client: "VW", op: "OP40", desc: "Dispositivo de Solda Lateral", makeBuy: "MAKE", dateSupplier: new Date("2025-11-15"), dateFinal: new Date("2025-11-10"), hours: 210, value: 18500, pipeline: { dim3d: 1, material: 0.5, minuteria: 0.2, bordo: 0, montagem: 0, qualidade: 0 } }
+    ];
 }
 
-function startApp() {
-    elements.uploadView.classList.add('hidden');
-    elements.mainApp.classList.remove('hidden');
-
-    if (elements.headerProjectTitle && state.projectName) {
-        // .toUpperCase() transforma em maiúsculas (ex: "vw patagonia" -> "VW PATAGONIA")
-        elements.headerProjectTitle.textContent = `PROJECT: ${state.projectName.toUpperCase()}`;
-    }
-
-    populateTransmissionFilter();
-    renderTracker();
-    renderTable();
-}
-
-// ==============================================================
-// 6. INICIALIZAÇÃO
-// ==============================================================
-
+// --- INICIALIZAÇÃO ---
 document.addEventListener('DOMContentLoaded', () => {
     initDOMElements();
-    renderSidebar('sidebar'); 
-    initEvents();
+    renderSidebar();
+    setTimeout(initEvents, 50); // Garante que sidebar carregou
 });

@@ -1,230 +1,127 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Supply Chain Tracker</title>
-
-    <!-- Biblioteca para leitura de arquivos Excel -->
+    <title>PCP Manufacturing Dashboard</title>
+    
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-
-    <!-- Fontes -->
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Estilos Externos -->
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-    <!-- ============================================
-         UPLOAD VIEW - Tela inicial
-         ============================================ -->
     <div id="upload-view" class="upload-view">
         <div class="upload-card">
-            <div class="upload-header-section">
-                <!-- Logo -->
-                <img src="logo-comau.png" alt="Logo da Comau" class="logo-responsivo">
-                <div class="brand-logo">COMAU</div>
-                <h1 class="upload-title">Supply Chain Tracker</h1>
-                <p class="upload-subtitle">Sistema de Integração e Visualização de Projetos</p>
+            <div class="brand-logo">SIV-PCP</div>
+            <h1 class="upload-title">PCP Manufacturing</h1>
+            <p class="upload-subtitle">Controle de Fluxo e Prazos</p>
 
-                <div class="input-group" style="margin-top: 15px; width: 100%; display: flex; justify-content: center;">
-                    <input type="text" id="input-project-name" class="project-input" placeholder="Digite o nome do projeto (Obrigatório)" required>
-                </div>
-
+            <div class="input-group" style="display:flex; justify-content:center;">
+                <input type="text" id="input-project-name" class="project-input" placeholder="Nome do Projeto (Opcional)">
             </div>
 
             <div class="dropzone" id="dropzone">
                 <div class="dropzone-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                         <polyline points="17 8 12 3 7 8"></polyline>
                         <line x1="12" y1="3" x2="12" y2="15"></line>
                     </svg>
                 </div>
-                <h3>Arraste sua planilha aqui</h3>
-                <p>Suporta arquivos .XLSX e .XLSM</p>
+                <h3>Arraste a planilha "PCP MANUFACTURING" aqui</h3>
+                <p style="font-size:12px; color:#999; margin-top:5px">Suporta arquivos .XLSX</p>
                 <input type="file" id="file-input" accept=".xlsx, .xlsm" style="display: none;">
-                <button id="btn-browse" class="btn-primary">Buscar Arquivo</button>
-            </div>
-
-            <div class="text-center" style="padding-bottom: 20px;">
-                <button id="btn-demo" class="btn-demo">Entrar no Modo Demonstração (VW Patagônia)</button>
+                <button id="btn-browse" class="btn-primary" style="margin-top:15px">Buscar Arquivo</button>
             </div>
             
+            <div class="text-center">
+                <button id="btn-demo" class="btn-demo">Usar Dados de Exemplo</button>
+            </div>
         </div>
     </div>
 
-    <!-- ============================================
-         MAIN APP - Aplicação Principal
-         ============================================ -->
     <div id="main-app" class="app-container hidden">
 
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <img src="logo-comau.png" alt="Logo da Comau" class="logo-responsivo-inicio">
-            </aside>
-            
-        <!-- Conteúdo Principal -->
+        <aside class="sidebar" id="sidebar"></aside>
+
         <main class="main-content">
 
-            <!-- Header -->
             <header class="top-bar">
                 <div class="project-header-info">
-                    <h2 id="header-project-title">PROJECT: ...</h2>
-                    <h1>SUPPLY CHAIN TRACKER</h1>
+                    <h2 id="header-project-title">VISÃO GERAL</h2>
+                    <h1>FLUXO DE PRODUÇÃO</h1>
                 </div>
-                <div class="project-header-right">
-                    <div class="brand-text">COMAU</div>
-                    <div class="update-text">Atualizado: 09/02/2026</div>
+                
+                <div class="header-filters">
+                    <select id="filter-client" class="header-select">
+                        <option value="all">Todos os Clientes</option>
+                    </select>
+                    <select id="filter-makebuy" class="header-select">
+                        <option value="all">Make & Buy</option>
+                        <option value="MAKE">Apenas MAKE</option>
+                        <option value="BUY">Apenas BUY</option>
+                    </select>
                 </div>
             </header>
 
-            <!-- VIEW: TRACKER (Cards Style) -->
-            <div id="view-tracker" class="view-section">
-
-                <!-- MENU DE NAVEGAÇÃO SUPERIOR -->
-                <div class="tracker-nav-container">
-
-                    <!-- Linha Superior -->
-                    <div class="nav-row">
-
-
-                        <!-- Project Pill -->
-                        <div class="nav-pill" style="flex: 2;">
-                            <span class="pill-label">PROJECT:</span>
-                            <select class="pill-select" id="filter-project-tracker">
-                                <option>VW PATAGÔNIA</option>
-                            </select>
-                            <svg class="select-arrow" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M7 10l5 5 5-5z" />
-                            </svg>
-                        </div>
-
-                        <!-- Line Pill -->
-                        <div class="nav-pill" style="flex: 1.5;">
-                            <span class="pill-label">LINE:</span>
-                            <select class="pill-select" id="filter-line-tracker">
-                                <option>AUFBAU</option>
-                                <option>UNTERBAU</option>
-                                <option>SIDEFRAMES</option>
-                            </select>
-                            <svg class="select-arrow" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M7 10l5 5 5-5z" />
-                            </svg>
-                        </div>
-
-                        <!-- Legend (Right Side) -->
-                        <div class="legend-vertical">
-                            <div class="legend-item">
-                                <span class="status-box box-blue"></span> <span>Ongoing</span>
-                            </div>
-                            <div class="legend-item">
-                                <span class="status-box box-red"></span> <span>Delayed</span>
-                            </div>
-                            <div class="legend-item">
-                                <span class="status-box box-green"></span> <span>Complete</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Linha Inferior -->
-                    <div class="nav-row">
-                        <!-- Station Pill -->
-                        <div class="nav-pill" style="flex: 1;">
-                            <span class="pill-label">STATION:</span>
-                            <select class="pill-select" id="filter-station-tracker">
-                                <option value="all">Todas</option>
-                                <option>OP10</option>
-                                <option>OP20</option>
-                                <option>OP30</option>
-                                <option>OP40</option>
-                            </select>
-                            <svg class="select-arrow" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M7 10l5 5 5-5z" />
-                            </svg>
-                        </div>
-
-                        <!-- Transmission Pill -->
-                        <div class="nav-pill" style="flex: 2;">
-                            <span class="pill-label">TRANSMISSION:</span>
-                            <select class="pill-select" id="filter-transmission-tracker">
-                                <option value="all">Todas</option>
-                                <!-- Opções preenchidas via JS futuramente -->
-                            </select>
-                            <svg class="select-arrow" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M7 10l5 5 5-5z" />
-                            </svg>
-                        </div>
-
-                        <!-- Espaçador para alinhar com a legenda acima -->
-                        <div style="width: 100px;"></div>
-                    </div>
-
+            <div id="kpi-section" class="kpi-bar">
+                <div class="kpi-card">
+                    <div class="kpi-label">Horas disponíeveis</div>
+                    <div class="kpi-value" id="kpi-hours">0h</div>
                 </div>
-
-                <!-- Área Scrollável dos Cards -->
-                <div class="tracker-content" id="tracker-content-area">
-                    <!-- O Javascript vai preencher isso -->
+                <div class="kpi-card">
+                    <div class="kpi-label">Orçamento planejado</div>
+                    <div class="kpi-value" id="kpi-value">R$ 0</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Itens em atrasoS</div>
+                    <div class="kpi-value text-red" id="kpi-risk">0</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label" style="display: flex; align-items: center; gap: 5px;">
+                        Eficiência Fluxo
+                        <div class="tooltip-container">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tooltip-icon">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                            <div class="tooltip-text">
+                                <strong>Como é calculado?</strong><br>
+                                É a soma do progresso das 6 etapas (3D, Mat, Min, Bordo, Mont, Qual) de todos os itens listados, dividida pela pontuação máxima possível. Cada etapa concluída vale 1 ponto.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="kpi-value text-green" id="kpi-efficiency">0%</div>
+                    <div class="kpi-sub">Progresso Global</div>
                 </div>
             </div>
 
-            <!-- VIEW: TABLE (Lista Simples) - ATUALIZADO CONFORME PEDIDO -->
+            <div id="view-tracker" class="view-section content-scroll">
+                <div id="tracker-content-area" class="cards-wrapper">
+                    </div>
+            </div>
+
             <div id="view-table" class="view-section hidden generic-padding">
-                <h2 class="section-title">Lista Detalhada de Materiais</h2>
-
-                <!-- Controles da Tabela (Snippet Inserido) -->
-                <div class="table-controls">
-                    <div class="search-box">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                        </svg>
-                        <input type="text" id="search-input" placeholder="Buscar por código, descrição ou linha...">
-                    </div>
-
-                    <div class="table-actions">
-                        <select id="filter-line" class="select-filter">
-                            <option value="">Todas as Linhas</option>
-                        </select>
-                        <select id="filter-transmission" class="select-filter">
-                            <option value="">Todas as Transmissões</option>
-                        </select>
-                        <button class="btn-export">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="7 10 12 15 17 10"></polyline>
-                                <line x1="12" y1="15" x2="12" y2="3"></line>
-                            </svg>
-                            Exportar
-                        </button>
-                    </div>
-                </div>
-
+                <h2 class="section-title">Lista Tabular Detalhada</h2>
                 <div class="table-container">
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>Estação</th>
+                                <th>ID</th>
                                 <th>Transmissão</th>
-                                <th>Fase</th>
-                                <th>Planejado</th>
-                                <th>Real</th>
+                                <th>Operação</th>
+                                <th>Fornecedor</th>
+                                <th>Entrega Prevista</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
-                        <tbody id="table-body">
-                            <!-- JS preenche -->
-                        </tbody>
+                        <tbody id="table-body"></tbody>
                     </table>
                 </div>
             </div>
@@ -232,8 +129,6 @@
         </main>
     </div>
 
-    <!-- Script Principal (ES Modules para importar navBar.js) -->
-    <script type="module" src="script.js"></script>
+    <script src="script.js"></script>
 </body>
-
 </html>

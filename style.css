@@ -1,26 +1,20 @@
-/* ========================================
-   SIV-SITE - Sistema de Integração e Visualização
-   Estilos CSS Modularizados
-   ======================================== */
+/* =========================================
+   CSS - ESTILOS
+   ========================================= */
+   :root {
+    --primary: #2563eb;         /* Azul Principal */
+    --primary-dark: #1e40af;
+    --bg-main: #f3f4f6;         /* Fundo Cinza Claro */
+    --bg-card: #ffffff;
+    --text-main: #1f2937;
+    --text-sec: #6b7280;
+    --border: #e5e7eb;
 
-/* 1. VARIÁVEIS & RESET */
-:root {
-    --primary-main: #005596;
-    --primary-dark: #00447a;
-    --primary-light: #337bb0;
-    
-    --bg-main: #EEF4FA;
-    --bg-card: #FFFFFF;
-    
-    --text-main: #333333;
-    --text-light: #666666;
-    --border-color: #D1D9E6;
-
-    /* Status Colors */
-    --status-green: #00C851;
-    --status-red: #FF4444;
-    --status-blue: #33B5E5;
-    --status-gray: #e0e0e0;
+    /* Cores de Status */
+    --status-success: #10b981;  /* Verde */
+    --status-warning: #f59e0b;  /* Laranja */
+    --status-danger: #ef4444;   /* Vermelho */
+    --status-neutral: #e5e7eb;  /* Cinza (Vazio) */
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
@@ -30,487 +24,241 @@ body {
     background-color: var(--bg-main);
     color: var(--text-main);
     height: 100vh;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
 }
 
-/* 2. UTILITÁRIOS */
 .hidden { display: none !important; }
-.text-center { text-align: center; }
-.text-right { text-align: right; }
-.mt-auto { margin-top: auto; }
-.generic-padding { padding: 20px 30px; }
-.section-title { margin-bottom: 20px; color: var(--text-main); }
 
-/* 3. TELA DE UPLOAD */
+/* --- TELA DE UPLOAD --- */
 .upload-view {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #f9fafb; z-index: 1000;
+    display: flex; align-items: center; justify-content: center;
 }
-
 .upload-card {
-    background: var(--bg-card);
-    width: 100%;
-    max-width: 900px;
-    border-radius: 16px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-    display: flex;
-    flex-direction: column;
-    border: 1px solid white;
+    background: white; padding: 40px; border-radius: 16px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    text-align: center; width: 100%; max-width: 600px;
 }
-
-.upload-header-section {
-    padding: 40px;
-    text-align: center;
-    border-bottom: 1px solid #eee;
-}
-
-.logo-responsivo {
-    max-width: 10%;
-    height: auto;
-    display: block;
-    margin: 0 auto 15px auto;
-}
-
-/* Logo responsivo na sidebar inicial */
-.logo-responsivo-inicio {
-    width: 60%;              /* ocupa boa parte da largura da sidebar */
-    max-width: 56px;         /* limite para telas grandes */
-    height: auto;            /* mantém proporção */
-    display: block;
-    margin: 0 auto 24px auto;/* centraliza e afasta dos ícones */
-}
-
-@media (max-width: 768px) {
-    .logo-responsivo-inicio {
-        width: 70%;
-        max-width: 48px;     /* um pouco menor em telas pequenas */
-        margin-bottom: 18px;
-    }
-}
-
-.brand-logo {
-    font-weight: 900;
-    font-size: 24px;
-    color: var(--primary-main);
-    margin-bottom: 10px;
-}
-
-.upload-title {
-    font-size: 28px;
-    color: var(--primary-main);
-    margin-bottom: 10px;
-}
-
-.upload-subtitle {
-    font-size: 16px;
-    color: var(--text-light);
-    margin-bottom: 25px;
-}
-
-.project-description {
-    background-color: #f8f9fa;
-    padding: 20px;
-    border-radius: 8px;
-    border-left: 4px solid var(--primary-main);
-    text-align: left;
-    margin: 20px 40px;
-    font-size: 14px;
-    line-height: 1.6;
-    color: #444;
-}
+.brand-logo { font-size: 24px; font-weight: 800; color: var(--primary); margin-bottom: 10px; }
+.upload-title { font-size: 20px; margin-bottom: 5px; color: var(--text-main); }
+.upload-subtitle { color: var(--text-sec); margin-bottom: 20px; }
 
 .dropzone {
-    border: 2px dashed #cbd5e0;
-    border-radius: 12px;
-    padding: 40px;
-    text-align: center;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    margin: 0 40px 30px 40px;
-    background: #fafafa;
+    border: 2px dashed #cbd5e1; border-radius: 12px; padding: 40px;
+    margin: 20px 0; cursor: pointer; transition: all 0.2s;
+    background: #f8fafc;
 }
-
-.dropzone:hover {
-    border-color: var(--primary-main);
-    background: #f0f7ff;
-}
-
-.dropzone-icon svg {
-    width: 48px;
-    height: 48px;
-    color: var(--primary-main);
-    margin-bottom: 15px;
-}
-
-.dropzone p { color: #888; font-size: 13px; margin-top: 5px; }
+.dropzone:hover { border-color: var(--primary); background: #eff6ff; }
+.dropzone svg { width: 48px; height: 48px; color: var(--primary); margin-bottom: 10px; }
+.dropzone h3 { font-size: 16px; color: var(--text-main); }
 
 .btn-primary {
-    background-color: var(--primary-main);
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 6px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 20px;
+    background: var(--primary); color: white; border: none;
+    padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 500;
     transition: background 0.2s;
 }
-.btn-primary:hover { background-color: var(--primary-dark); }
+.btn-primary:hover { background: var(--primary-dark); }
 
 .btn-demo {
-    background: transparent;
-    color: var(--text-light);
-    border: 1px solid #ddd;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 14px;
-    cursor: pointer;
+    background: transparent; color: var(--text-sec); border: 1px solid var(--border);
+    padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-top: 10px;
+    font-size: 13px;
 }
-.btn-demo:hover { background: #f0f0f0; color: #333; }
+.btn-demo:hover { background: #f3f4f6; color: var(--text-main); }
 
-/* 4. LAYOUT PRINCIPAL */
+.project-input {
+    width: 80%; padding: 10px; border: 1px solid var(--border);
+    border-radius: 6px; margin-top: 5px; text-align: center;
+}
+
+/* --- LAYOUT PRINCIPAL --- */
 .app-container { display: flex; height: 100vh; width: 100%; }
 
-/* Sidebar Redesenhada */
+/* Sidebar */
 .sidebar {
-    width: 80px;
-    background-color: var(--bg-card);
-    border-right: 1px solid var(--border-color);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 20px;
+    width: 80px; background: white; border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; align-items: center; padding-top: 20px;
     z-index: 10;
 }
-
-.sidebar-logo-text {
-    font-weight: 900;
-    font-size: 14px;
-    color: var(--primary-main);
-    margin-bottom: 30px;
-}
-
-/* Ícone + Texto no Menu Lateral */
 .sidebar-icon {
-    width: 64px;
-    height: 64px; /* Mais alto para caber o texto */
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column; /* Empilha ícone e texto */
-    align-items: center;
-    justify-content: center;
-    color: var(--text-light);
-    margin-bottom: 15px;
-    cursor: pointer;
-    transition: all 0.2s;
-    gap: 4px;
+    width: 54px; height: 54px; border-radius: 10px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: var(--text-sec); margin-bottom: 15px; cursor: pointer;
+    font-size: 10px; gap: 4px; transition: all 0.2s;
 }
+.sidebar-icon:hover, .sidebar-icon.active { background: #eff6ff; color: var(--primary); }
+.sidebar-icon svg { width: 22px; height: 22px; }
+.mt-auto { margin-top: auto; }
 
-.sidebar-label {
-    font-size: 10px;
-    font-weight: 600;
-    line-height: 1;
-    text-align: center;
-}
+/* Main Content */
+.main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
-.sidebar-icon:hover, .sidebar-icon.active {
-    background-color: var(--primary-main);
-    color: white;
-}
-
-.sidebar-icon svg { width: 24px; height: 24px; }
-
-/* Main Content Area */
-.main-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    background-color: var(--bg-main);
-}
-
+/* Top Bar */
 .top-bar {
-    background-color: var(--bg-card);
-    border-bottom: 1px solid var(--border-color);
-    padding: 15px 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+    background: white; border-bottom: 1px solid var(--border);
+    padding: 15px 30px; display: flex; justify-content: space-between; align-items: center;
+}
+.project-header-info h2 { font-size: 11px; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+.project-header-info h1 { font-size: 18px; font-weight: 800; color: var(--primary-dark); }
+
+.header-select {
+    padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px;
+    background: white; color: var(--text-main); margin-left: 10px; font-size: 13px; cursor: pointer;
 }
 
-.project-header-info h2 {
-    font-size: 14px;
-    color: var(--text-light);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-bottom: 5px;
-}
-.project-header-info h1 {
-    font-size: 24px;
-    font-weight: 800;
-    color: var(--primary-main);
-}
-.project-header-right { text-align: right; }
-.brand-text { font-weight: 900; font-size: 20px; color: #333; }
-.update-text { font-size: 12px; color: #888; margin-top: 4px; }
-
-/* 5. TRACKER VIEW */
-.view-section {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.tracker-nav-container {
+/* --- BARRA DE KPIs --- */
+.kpi-bar {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
     padding: 20px 30px;
-    background: transparent;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+    background: var(--bg-main);
 }
-.nav-row { display: flex; align-items: center; gap: 20px; }
-
-/* Nav Pills */
-.nav-pill {
-    position: relative;
-    background: white;
-    border: 1px solid #1e293b;
-    border-radius: 50px;
-    padding: 8px 20px;
-    display: flex;
-    align-items: center;
-    min-height: 45px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+.kpi-card {
+    background: white; padding: 15px 20px; border-radius: 10px;
+    border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
+.kpi-label { font-size: 11px; text-transform: uppercase; color: var(--text-sec); font-weight: 700; letter-spacing: 0.5px; }
+.kpi-value { font-size: 24px; font-weight: 800; margin-top: 5px; color: #111; }
+.kpi-sub { font-size: 11px; color: var(--text-sec); margin-top: 2px; }
+.text-red { color: var(--status-danger); }
+.text-green { color: var(--status-success); }
 
-.pill-label {
-    font-weight: 700;
-    color: #000;
-    font-size: 14px;
-    text-transform: uppercase;
-    margin-right: 15px;
-    white-space: nowrap;
+/* --- CARDS DE FLUXO (PIPELINE) --- */
+.view-section { flex: 1; overflow-y: auto; padding: 0 30px 30px 30px; }
+.cards-wrapper { display: flex; flex-direction: column; gap: 12px; }
+
+.item-card {
+    background: white; border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 24px; display: grid; grid-template-columns: 280px 1fr 200px;
+    gap: 30px; align-items: center; transition: all 0.2s;
+}
+.item-card:hover {
+    transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+    border-color: var(--primary);
 }
 
-.pill-select {
-    appearance: none;
-    -webkit-appearance: none;
-    background: transparent;
-    border: none;
-    font-size: 14px;
-    color: #333;
-    width: 100%;
-    font-family: 'Inter', sans-serif;
-    cursor: pointer;
-    font-weight: 500;
-    padding-right: 20px;
+/* Coluna 1: Informações */
+.card-info h3 { font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 4px; }
+.card-info .desc { font-size: 13px; color: var(--text-sec); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
+.badges { margin-top: 8px; display: flex; gap: 6px; }
+.badge { font-size: 10px; padding: 3px 8px; border-radius: 10px; font-weight: 600; text-transform: uppercase; }
+.badge-make { background: #dbeafe; color: #1e40af; } /* Azul claro */
+.badge-buy { background: #fef3c7; color: #92400e; }  /* Amarelo claro */
+.badge-client { background: #f3f4f6; color: #4b5563; }
+
+/* Coluna 2: O Visual Pipeline */
+.pipeline-container { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.pipeline-track {
+    display: flex; height: 12px; background: #f3f4f6; border-radius: 6px;
+    overflow: hidden; gap: 2px; /* Espacinho branco entre barras */
 }
+.pipeline-segment { flex: 1; background: var(--status-neutral); position: relative; cursor: help; }
 
-.select-arrow {
-    position: absolute;
-    right: 15px;
-    width: 14px;
-    height: 14px;
-    color: #000;
-    pointer-events: none;
+/* As cores que mudam com JS */
+.seg-complete { background: var(--status-success); } /* Verde */
+.seg-partial { background: var(--status-warning); }  /* Laranja */
+
+.pipeline-legend { display: flex; justify-content: space-between; font-size: 9px; color: #9ca3af; text-transform: uppercase; font-weight: 600; padding: 0 2px; }
+
+/* Coluna 3: Datas e Status */
+.card-dates { text-align: right; border-left: 1px solid var(--border); padding-left: 20px; }
+.date-row { font-size: 12px; margin-bottom: 4px; }
+.date-label { color: var(--text-sec); margin-right: 5px; }
+.date-val { font-weight: 600; }
+.status-pill {
+    display: inline-block; padding: 4px 10px; border-radius: 6px;
+    font-size: 11px; font-weight: 700; margin-top: 6px;
 }
+.st-ok { background: #d1fae5; color: #065f46; }
+.st-risk { background: #fee2e2; color: #991b1b; }
 
-/* Legend */
-.legend-vertical { display: flex; flex-direction: column; gap: 5px; min-width: 120px; }
-.legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: #333; }
-.status-box { width: 16px; height: 16px; border: 1px solid rgba(0,0,0,0.2); display: inline-block; }
-.box-blue { background-color: var(--status-blue); }
-.box-red { background-color: var(--status-red); }
-.box-green { background-color: var(--status-green); }
+/* TABELA */
+.table-container { background: white; border-radius: 8px; border: 1px solid var(--border); overflow: hidden; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th { background: #f9fafb; padding: 12px; text-align: left; font-weight: 600; color: var(--text-sec); border-bottom: 1px solid var(--border); }
+.data-table td { padding: 12px; border-bottom: 1px solid var(--border); color: var(--text-main); }
 
-/* Tracker Cards */
-.tracker-content { flex: 1; overflow-y: auto; padding: 20px 30px; }
-.station-section { margin-bottom: 40px; }
-.station-title {
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 15px;
-    color: #444;
-    border-left: 5px solid var(--primary-main);
-    padding-left: 10px;
-    background: rgba(255,255,255,0.4);
-    padding: 10px;
-    border-radius: 0 8px 8px 0;
-    display: inline-block;
-    min-width: 200px;
-}
-.cards-container { display: flex; flex-wrap: wrap; gap: 20px; }
-.tracker-card {
-    background: white;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    width: 380px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-    transition: transform 0.2s;
-    flex-shrink: 0;
-}
-.tracker-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 15px rgba(0,0,0,0.05);
-    border-color: var(--primary-main);
-}
-.card-header {
-    padding: 12px 15px;
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #eee;
-    font-weight: 700;
-    font-size: 15px;
-    color: #333;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.card-body { padding: 10px 15px; }
+/* Scrollbar mais bonita */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-/* Grid within Card */
-.phase-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 8px; font-size: 13px; }
-.grid-header { font-weight: 600; color: #777; font-size: 11px; text-transform: uppercase; text-align: center; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 5px; }
-.grid-header.text-left { text-align: left; }
-.phase-row { display: contents; }
-.phase-name { display: flex; align-items: center; color: #444; font-weight: 500; }
-.phase-date { text-align: center; color: #555; background: #fdfdfd; border-radius: 4px; padding: 2px 0; }
-.phase-status { display: flex; align-items: center; justify-content: center; }
-.status-dot { width: 16px; height: 16px; border-radius: 50%; display: inline-block; border: 1px solid rgba(0,0,0,0.1); }
-.dot-green { background-color: var(--status-green); }
-.dot-red { background-color: var(--status-red); }
-.dot-blue { background-color: var(--status-blue); }
-.dot-gray { background-color: var(--status-gray); }
-
-/* 7. TABLE VIEW & CONTROLS (Novo Estilo) */
-.table-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    gap: 15px;
-    flex-wrap: wrap;
-}
-
-.search-box {
-    position: relative;
-    flex: 1;
-    max-width: 400px;
-}
-
-.search-box svg {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 18px;
-    height: 18px;
-    color: #999;
-}
-
-.search-box input {
-    width: 100%;
-    padding: 10px 15px 10px 40px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 14px;
-    transition: border 0.2s;
-}
-
-.search-box input:focus { border-color: var(--primary-main); }
-
-.table-actions { display: flex; gap: 10px; }
-
-.select-filter {
-    padding: 8px 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background: white;
-    font-size: 14px;
-    color: #333;
-    cursor: pointer;
-}
-
-.btn-export {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    background: var(--primary-main);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 500;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background 0.2s;
-}
-
-.btn-export:hover { background: var(--primary-dark); }
-.btn-export svg { width: 16px; height: 16px; }
-
-.table-container {
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-table.data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-.data-table th { background: #f1f3f5; text-align: left; padding: 12px 15px; font-weight: 600; color: #555; border-bottom: 1px solid var(--border-color); }
-.data-table td { padding: 10px 15px; border-bottom: 1px solid #eee; color: #333; }
-.data-table tbody tr:hover { background: #f8f9fa; }
+/* Títulos de Seção */
+.section-title { font-size: 16px; font-weight: 700; margin-bottom: 15px; color: var(--text-main); }
+.generic-padding { padding: 20px 30px; }
 
 /* =========================================
-   ESTILO DO CAMPO DE NOME DO PROJETO
+   TOOLTIP (Ponto de Interrogação)
    ========================================= */
-
-/* Container do input para garantir centralização e espaçamento */
-.input-group {
-    margin-top: 15px;       /* Espaço acima (abaixo do subtítulo) */
-    margin-bottom: 20px;    /* Espaço abaixo (acima do dropzone) */
-    width: 100%;
-    display: flex;
-    justify-content: center; /* Centraliza horizontalmente */
+   .tooltip-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: help;
 }
 
-/* O campo de digitação em si */
-.project-input {
-    width: 85%;             /* Largura do campo */
-    padding: 12px 15px;     /* Espaço interno confortável */
-    font-size: 16px;        /* Tamanho da letra legível */
-    font-family: 'Inter', sans-serif; 
-    
-    border: 2px solid #e0e0e0; /* Borda cinza clara */
-    border-radius: 8px;        /* Cantos arredondados */
-    background-color: #f9f9f9; /* Fundo levemente cinza */
-    color: #333;               /* Cor do texto digitado */
-    
-    text-align: center;        /* Texto centralizado */
-    outline: none;             /* Remove a borda padrão do navegador */
-    transition: all 0.3s ease; /* Animação suave ao clicar */
+.tooltip-icon {
+    width: 14px;
+    height: 14px;
+    color: var(--text-sec);
+    transition: color 0.2s;
+    margin-bottom: 1px;
 }
 
-/* Estado: Quando o usuário clica para digitar (Focus) */
-.project-input:focus {
-    border-color: #007bff;     /* Borda fica azul */
-    background-color: #fff;    /* Fundo fica branco puro */
-    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1); /* Brilho azul suave em volta */
+.tooltip-container:hover .tooltip-icon {
+    color: var(--primary); /* Fica azul ao passar o mouse */
 }
 
-/* Estado: Texto de ajuda (Placeholder) */
-.project-input::placeholder {
-    color: #999;
+.tooltip-text {
+    visibility: hidden;
+    width: 260px;
+    background-color: #1f2937; /* Fundo escuro */
+    color: #ffffff;
+    text-align: left;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 11px;
     font-weight: 400;
+    text-transform: none; /* Tira o maiúsculo do label */
+    letter-spacing: normal;
+    line-height: 1.5;
+    
+    /* Posicionamento flutuante acima do ícone */
+    position: absolute;
+    z-index: 100;
+    bottom: 150%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.2s, bottom 0.2s;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
+
+/* Criando a "setinha" apontando para baixo */
+.tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -6px;
+    border-width: 6px;
+    border-style: solid;
+    border-color: #1f2937 transparent transparent transparent;
+}
+
+/* Mostra o tooltip no hover */
+.tooltip-container:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+    bottom: 130%; /* Dá um leve efeito de deslizar para baixo */
+}
+
+.tooltip-text strong {
+    color: var(--status-success); /* Destaca o título em verde */
+    font-size: 12px;
+    display: inline-block;
+    margin-bottom: 4px;
+}   
