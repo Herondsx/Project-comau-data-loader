@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PCP Manufacturing Dashboard</title>
+    
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="upload-view" class="upload-view">
+        <div class="upload-card">
+            <div class="brand-logo">SIV-PCP</div>
+            <h1 class="upload-title">PCP Manufacturing</h1>
+            <p class="upload-subtitle">Controle de Fluxo e Prazos</p>
+
+            <div class="input-group" style="display:flex; justify-content:center;">
+                <input type="text" id="input-project-name" class="project-input" placeholder="Nome do Projeto (Opcional)">
+            </div>
+
+            <div class="dropzone" id="dropzone">
+                <div class="dropzone-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                </div>
+                <h3>Arraste a planilha "PCP MANUFACTURING" aqui</h3>
+                <p style="font-size:12px; color:#999; margin-top:5px">Suporta arquivos .XLSX</p>
+                <input type="file" id="file-input" accept=".xlsx, .xlsm" style="display: none;">
+                <button id="btn-browse" class="btn-primary" style="margin-top:15px">Buscar Arquivo</button>
+            </div>
+            
+            <div class="text-center">
+                <button id="btn-demo" class="btn-demo">Usar Dados de Exemplo</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-app" class="app-container hidden">
+
+        <aside class="sidebar" id="sidebar"></aside>
+
+        <main class="main-content">
+
+            <header class="top-bar">
+                <div class="project-header-info">
+                    <h2 id="header-project-title">VISÃO GERAL</h2>
+                    <h1>FLUXO DE PRODUÇÃO</h1>
+                </div>
+                
+                <div class="header-filters">
+                    <select id="filter-client" class="header-select">
+                        <option value="all">Todos os Clientes</option>
+                    </select>
+                    <select id="filter-makebuy" class="header-select">
+                        <option value="all">Make & Buy</option>
+                        <option value="MAKE">Apenas MAKE</option>
+                        <option value="BUY">Apenas BUY</option>
+                    </select>
+                </div>
+            </header>
+
+            <div id="kpi-section" class="kpi-bar">
+                <div class="kpi-card">
+                    <div class="kpi-label">Horas disponíeveis</div>
+                    <div class="kpi-value" id="kpi-hours">0h</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Orçamento planejado</div>
+                    <div class="kpi-value" id="kpi-value">R$ 0</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Itens em atrasoS</div>
+                    <div class="kpi-value text-red" id="kpi-risk">0</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label" style="display: flex; align-items: center; gap: 5px;">
+                        Eficiência Fluxo
+                        <div class="tooltip-container">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tooltip-icon">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                            <div class="tooltip-text">
+                                <strong>Como é calculado?</strong><br>
+                                É a soma do progresso das 6 etapas (3D, Mat, Min, Bordo, Mont, Qual) de todos os itens listados, dividida pela pontuação máxima possível. Cada etapa concluída vale 1 ponto.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="kpi-value text-green" id="kpi-efficiency">0%</div>
+                    <div class="kpi-sub">Progresso Global</div>
+                </div>
+            </div>
+
+            <div id="view-tracker" class="view-section content-scroll">
+                <div id="tracker-content-area" class="cards-wrapper">
+                    </div>
+            </div>
+
+            <div id="view-table" class="view-section hidden generic-padding">
+                <h2 class="section-title">Lista Tabular Detalhada</h2>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Transmissão</th>
+                                <th>Operação</th>
+                                <th>Fornecedor</th>
+                                <th>Entrega Prevista</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
