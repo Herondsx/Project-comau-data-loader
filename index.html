@@ -3,173 +3,1003 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comau - PCP Manufacturing Dashboard</title>
+    <title>Supply Chain Tracker - COMAU</title>
+    <!-- SheetJS para ler planilhas Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Ícones Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        /* === CSS RESET & BASE === */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f3f4f6; 
+            color: #1f2937;
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+        }
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+        .hidden { display: none !important; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
 
-    <link rel="stylesheet" href="style.css">
+        /* === ICONS === */
+        .icon-sm { width: 1rem; height: 1rem; }
+        .icon-lg { width: 2rem; height: 2rem; }
+        .icon-xl { width: 4rem; height: 4rem; }
+        .icon-inline { display: inline-block; vertical-align: text-bottom; width: 0.875rem; height: 0.875rem; margin-right: 0.25rem; }
+        
+        .text-yellow { color: #facc15; }
+        .text-blue { color: #3b82f6; }
+        .text-green { color: #4ade80; }
+        .text-red { color: #f87171; }
+
+        /* === HEADER === */
+        .app-header {
+            background-color: #1e3a8a;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            z-index: 10;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .header-subtitle {
+            font-size: 0.875rem;
+            font-weight: 400;
+            color: #bfdbfe;
+            margin-left: 0.5rem;
+        }
+
+        .header-badges {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .status-badge-top {
+            font-size: 0.875rem;
+            background-color: #1e40af;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .status-badge-top span { font-weight: 700; }
+
+        /* === MAIN LAYOUT === */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* === DROP ZONE OVERLAY === */
+        .overlay {
+            position: absolute;
+            inset: 0;
+            background-color: #f9fafb;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .drop-zone {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            padding: 2.5rem;
+            text-align: center;
+            border: 2px dashed #9ca3af;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 42rem;
+        }
+
+        .drop-zone.dragover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+
+        .drop-zone h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .drop-zone p { color: #6b7280; margin-bottom: 1.5rem; line-height: 1.5; }
+        .drop-zone span { font-weight: 500; color: #374151; }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            cursor: pointer;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+            border: none;
+            display: inline-block;
+        }
+
+        .btn-primary { background-color: #2563eb; color: white; }
+        .btn-primary:hover { background-color: #1d4ed8; }
+        
+        .btn-secondary { background-color: #e5e7eb; color: #1f2937; }
+        .btn-secondary:hover { background-color: #d1d5db; }
+
+        .upload-feedback {
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: #2563eb;
+            font-weight: 500;
+            height: 1.5rem;
+        }
+
+        /* === DASHBOARD WORKSPACE === */
+        .dashboard-workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Filters Bar */
+        .filters-bar {
+            background-color: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+        }
+
+        .filter-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #4b5563;
+            text-transform: uppercase;
+        }
+
+        .filter-input {
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            width: 16rem;
+            outline: none;
+        }
+
+        .filter-select {
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            outline: none;
+        }
+
+        .filter-input:focus, .filter-select:focus { border-color: #3b82f6; }
+
+        .status-filters {
+            display: flex;
+            background-color: #f3f4f6;
+            padding: 0.25rem;
+            border-radius: 0.5rem;
+            gap: 0.25rem;
+            margin-left: auto;
+        }
+
+        .status-btn {
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #4b5563;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .status-btn:hover { background-color: #e5e7eb; }
+        .status-btn.active {
+            background-color: white;
+            color: #1f2937;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            padding: 1rem 1.5rem 0;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: 0.25rem;
+            padding: 0.75rem;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+            border-left: 4px solid #d1d5db;
+        }
+
+        .stat-card.blue { border-left-color: #3b82f6; }
+        .stat-card.yellow { border-left-color: #eab308; }
+        .stat-card.red { border-left-color: #ef4444; }
+        .stat-card.green { border-left-color: #22c55e; }
+
+        .stat-title {
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-top: 0.25rem;
+        }
+
+        /* Cards Container */
+        .cards-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #9ca3af;
+        }
+
+        .empty-state p { font-size: 1.125rem; font-weight: 500; margin-top: 1rem; }
+
+        /* Card Component */
+        .card {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1);
+            border-left: 8px solid #d1d5db;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            transition: box-shadow 0.2s;
+            height: 100%;
+        }
+
+        .card:hover { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-tag {
+            display: inline-block;
+            padding: 0.125rem 0.5rem;
+            background-color: #f3f4f6;
+            color: #4b5563;
+            border-radius: 0.25rem;
+            font-size: 0.625rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-title {
+            font-weight: 700;
+            color: #1f2937;
+            font-size: 0.875rem;
+            line-height: 1.2;
+            word-break: break-all;
+        }
+
+        .card-desc {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-stages {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-top: auto;
+        }
+
+        .stage-box {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.25rem;
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .stage-title {
+            font-size: 0.625rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            opacity: 0.75;
+            line-height: 1.2;
+        }
+
+        .stage-status {
+            font-weight: 500;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .card-footer {
+            margin-top: 1rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #f3f4f6;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+        .card-footer-item span {
+            font-weight: 500;
+            color: #374151;
+        }
+
+        /* Status Colors / Themes */
+        .border-complete { border-left-color: #22c55e !important; }
+        .bg-complete { background-color: #dcfce7; color: #166534; border-color: #bbf7d0; }
+        
+        .border-delayed { border-left-color: #ef4444 !important; }
+        .bg-delayed { background-color: #fee2e2; color: #991b1b; border-color: #fecaca; }
+        
+        .border-ongoing { border-left-color: #facc15 !important; }
+        .bg-ongoing { background-color: #fef9c3; color: #854d0e; border-color: #fef08a; }
+
+        @media (max-width: 1024px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .filters-bar { flex-direction: column; align-items: stretch; }
+            .status-filters { margin-left: 0; justify-content: space-between; }
+        }
+    </style>
 </head>
 <body>
 
-    <!-- ========== TELA DE UPLOAD ========== -->
-    <div id="upload-view" class="upload-view">
-        <div class="upload-card">
-            <img src="logo-comau.png" alt="Comau" class="upload-logo">
-            <h1 class="upload-title">PCP Manufacturing</h1>
-            <p class="upload-subtitle">Controle de Fluxo e Prazos</p>
-
-            <div class="input-group" style="display:flex; justify-content:center;">
-                <input type="text" id="input-project-name" class="project-input" placeholder="Nome do Projeto (Opcional)">
+    <!-- Navbar -->
+    <header class="app-header">
+        <div class="header-title-wrapper">
+            <i src="logo-comau.png" class="icon-lg text-yellow"></i>
+            <h1 class="header-title">SUPPLY CHAIN TRACKER <span class="header-subtitle">COMAU</span></h1>
+        </div>
+        <div class="header-badges">
+            <div class="status-badge-top" id="file1-status">
+                <i data-lucide="file-spreadsheet" class="icon-sm"></i> Construtivos: <span class="text-red">Pendente</span>
             </div>
-
-            <div class="dropzone" id="dropzone">
-                <div class="dropzone-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="17 8 12 3 7 8"></polyline>
-                        <line x1="12" y1="3" x2="12" y2="15"></line>
-                    </svg>
-                </div>
-                <h3>Arraste a planilha aqui</h3>
-                <p class="dropzone-hint">ou clique no botao abaixo</p>
-                <p class="dropzone-formats">Suporta arquivos .XLSX e .XLSM</p>
-                <input type="file" id="file-input" accept=".xlsx, .xlsm" style="display: none;">
-                <button id="btn-browse" class="btn-primary" style="margin-top:15px">Buscar Arquivo</button>
-            </div>
-
-            <div class="text-center">
-                <button id="btn-demo" class="btn-demo">Usar Dados de Exemplo</button>
-            </div>
-
-            <div class="upload-footer">
-                <span>Data Loader v1.0 Preview Alpha</span>
+            <div class="status-badge-top" id="file2-status">
+                <i data-lucide="file-spreadsheet" class="icon-sm"></i> Comerciais: <span class="text-red">Pendente</span>
             </div>
         </div>
-    </div>
+    </header>
 
-    <!-- ========== APP PRINCIPAL ========== -->
-    <div id="main-app" class="app-container hidden">
-
-        <aside class="sidebar" id="sidebar">
-            <!-- Renderizado via JS -->
-        </aside>
-
-        <main class="main-content">
-
-            <header class="top-bar">
-                <div class="project-header-info">
-                    <h2 id="header-project-title">VISAO GERAL</h2>
-                    <h1>FLUXO DE PRODUCAO</h1>
+    <!-- Main Content -->
+    <main class="main-content">
+        
+        <!-- Drop Zone Overlay (Visible initially) -->
+        <div id="drop-zone-overlay" class="overlay">
+            <div class="drop-zone" id="drop-zone">
+                <i data-lucide="upload-cloud" class="icon-xl text-blue" style="margin: 0 auto 1rem auto;"></i>
+                <h2>Arraste e solte as suas planilhas aqui</h2>
+                <p>
+                    São necessários 2 ficheiros:<br>
+                    1. <span>Novo controle - Follow-up Construtivos.xlsx</span><br>
+                    2. <span>CONTROLE DE COMERCIAIS VW247-PATAGONIA.xlsx</span>
+                </p>
+                <div class="btn-group">
+                    <label class="btn btn-primary">
+                        Procurar Ficheiros
+                        <input type="file" id="file-input" multiple accept=".xlsx, .xls, .csv" class="hidden">
+                    </label>
+                    <button id="btn-demo" class="btn btn-secondary">
+                        Carregar Dados de Exemplo
+                    </button>
                 </div>
+                <div id="upload-feedback" class="upload-feedback"></div>
+            </div>
+        </div>
 
-                <div class="header-controls">
-                    <div class="search-box">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                        </svg>
-                        <input type="text" id="search-input" placeholder="Buscar por ID, descricao, fornecedor...">
+        <!-- Dashboard Workspace (Hidden initially) -->
+        <div id="dashboard-workspace" class="dashboard-workspace hidden">
+            <!-- Filters Bar -->
+            <div class="filters-bar">
+                <div class="filter-label">
+                    <i data-lucide="filter" class="icon-sm"></i>
+                    <span>Filtros</span>
+                </div>
+                
+                <input type="text" id="filter-transmissao" placeholder="Procurar Transmissão..." class="filter-input">
+                
+                <select id="filter-linha" class="filter-select">
+                    <option value="">Todas as Linhas / OP</option>
+                    <!-- Options populated via JS -->
+                </select>
+
+                <div class="status-filters">
+                    <button class="status-btn active" data-status="all">Todos</button>
+                    <button class="status-btn" data-status="On delayed">Delayed</button>
+                    <button class="status-btn" data-status="Ongoing">Ongoing</button>
+                    <button class="status-btn" data-status="Complete">Complete</button>
+                </div>
+            </div>
+
+            <!-- Dashboard Stats -->
+            <div class="stats-grid">
+                <div class="stat-card blue">
+                    <div class="stat-title">Total de Transmissões</div>
+                    <div class="stat-value" id="stat-total">0</div>
+                </div>
+                <div class="stat-card yellow">
+                    <div class="stat-title">Ongoing</div>
+                    <div class="stat-value" id="stat-ongoing">0</div>
+                </div>
+                <div class="stat-card red">
+                    <div class="stat-title">On Delayed</div>
+                    <div class="stat-value" id="stat-delayed">0</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-title">Complete</div>
+                    <div class="stat-value" id="stat-complete">0</div>
+                </div>
+            </div>
+
+            <!-- Cards Container -->
+            <div class="cards-wrapper">
+                <div id="cards-container" class="cards-grid">
+                    <!-- Cards injected here via JS -->
+                </div>
+                <div id="empty-state" class="empty-state hidden">
+                    <i data-lucide="search-x" class="icon-xl" style="margin-bottom: 1rem;"></i>
+                    <p>Nenhuma transmissão encontrada com os filtros atuais.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Application State
+        const state = {
+            rawFile1Data: null, // Construtivos
+            rawFile2Data1: null, // Comerciais Bodyside
+            rawFile2Data2: null, // Comerciais AUFBAU
+            processedData: [], // Array de objetos Transmissão
+            filters: {
+                transmissao: '',
+                linha: '',
+                status: 'all'
+            },
+            uniqueLinhas: new Set()
+        };
+
+        // --- Drag and Drop Handling ---
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const uploadFeedback = document.getElementById('upload-feedback');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+        });
+
+        dropZone.addEventListener('drop', handleDrop, false);
+        fileInput.addEventListener('change', (e) => handleFiles(e.target.files), false);
+
+        document.getElementById('btn-demo').addEventListener('click', loadDemoData);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+
+        async function handleFiles(files) {
+            uploadFeedback.textContent = "A processar ficheiros... Aguarde.";
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const name = file.name.toLowerCase();
+                
+                try {
+                    const data = await readExcel(file);
+                    
+                    if (name.includes('construtivo') || name.includes('follow')) {
+                        // Arquivo 1: Pega a primeira aba
+                        const firstSheetName = data.SheetNames[0];
+                        state.rawFile1Data = XLSX.utils.sheet_to_json(data.Sheets[firstSheetName], { header: 1 });
+                        document.getElementById('file1-status').innerHTML = `<i data-lucide="check-circle" class="icon-sm text-green"></i> Construtivos: <span class="text-green">OK</span>`;
+                    } else if (name.includes('comerciai')) {
+                        // Arquivo 2: Pega as 2 primeiras abas
+                        if(data.SheetNames.length > 0) {
+                            state.rawFile2Data1 = XLSX.utils.sheet_to_json(data.Sheets[data.SheetNames[0]], { header: 1 });
+                        }
+                        if(data.SheetNames.length > 1) {
+                            state.rawFile2Data2 = XLSX.utils.sheet_to_json(data.Sheets[data.SheetNames[1]], { header: 1 });
+                        }
+                        document.getElementById('file2-status').innerHTML = `<i data-lucide="check-circle" class="icon-sm text-green"></i> Comerciais: <span class="text-green">OK</span>`;
+                    }
+                } catch (error) {
+                    console.error("Erro ao ler ficheiro:", error);
+                    alert("Erro ao ler o ficheiro " + file.name + ". Verifique se é um Excel válido.");
+                }
+            }
+            lucide.createIcons();
+
+            checkAndProcessData();
+        }
+
+        function readExcel(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        resolve(workbook);
+                    } catch (err) { reject(err); }
+                };
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        function checkAndProcessData() {
+            if (state.rawFile1Data && (state.rawFile2Data1 || state.rawFile2Data2)) {
+                uploadFeedback.textContent = "Dados carregados com sucesso! A construir o dashboard...";
+                setTimeout(() => {
+                    processExtractedData();
+                    document.getElementById('drop-zone-overlay').classList.add('hidden');
+                    document.getElementById('dashboard-workspace').classList.remove('hidden');
+                }, 500);
+            } else {
+                uploadFeedback.textContent = "Falta um dos ficheiros. Por favor, envie o outro.";
+            }
+        }
+
+        // --- Data Processing Logic ---
+
+        // Helper para datas do excel
+        function excelDateToJSDate(serial) {
+            if(!serial) return null;
+            if(typeof serial === 'string') return new Date(serial);
+            const utc_days  = Math.floor(serial - 25569);
+            const utc_value = utc_days * 86400;                                        
+            const date_info = new Date(utc_value * 1000);
+            const fractional_day = serial - Math.floor(serial) + 0.0000001;
+            let total_seconds = Math.floor(86400 * fractional_day);
+            const seconds = total_seconds % 60;
+            total_seconds -= seconds;
+            const hours = Math.floor(total_seconds / (60 * 60));
+            const minutes = Math.floor(total_seconds / 60) % 60;
+            return new Date(date_info.getFullYear(), date_info.getMonth(), date_info.getDate(), hours, minutes, seconds);
+        }
+
+        function formatJSDate(date) {
+            if(!date || isNaN(date)) return '-';
+            return date.toLocaleDateString('pt-PT');
+        }
+
+        function processExtractedData() {
+            const transmissionsMap = new Map();
+            state.uniqueLinhas.clear();
+
+            // Processar Arquivo 1 (Construtivos)
+            if(state.rawFile1Data) {
+                for (let i = 1; i < state.rawFile1Data.length; i++) {
+                    const row = state.rawFile1Data[i];
+                    if (!row || row.length < 5) continue;
+                    
+                    const linhaOp = row[2] || 'Sem Linha';
+                    const descricao = row[3] || '';
+                    const transmissao = String(row[4] || '').trim();
+
+                    if (!transmissao || transmissao.toLowerCase().includes('transmissão')) continue; 
+
+                    state.uniqueLinhas.add(linhaOp);
+
+                    transmissionsMap.set(transmissao, {
+                        id: transmissao,
+                        linhaOp: linhaOp,
+                        descricao: descricao,
+                        construtivo: {
+                            inicio: excelDateToJSDate(row[9]),
+                            entregaFornecedor: excelDateToJSDate(row[12]),
+                            reprogramacao: excelDateToJSDate(row[13]),
+                            entregaFinal: excelDateToJSDate(row[14]),
+                            statusGeral: String(row[15] || '').trim()
+                        },
+                        comerciais: []
+                    });
+                }
+            }
+
+            // Processar Arquivo 2 (Comerciais)
+            const processComerciaisSheet = (sheetData) => {
+                if(!sheetData) return;
+                for (let i = 1; i < sheetData.length; i++) {
+                    const row = sheetData[i];
+                    if (!row || row.length < 2) continue;
+
+                    const transmissao = String(row[0] || '').trim();
+                    if (!transmissao || transmissao.toLowerCase().includes('transmissão')) continue;
+
+                    const descPN = `${row[1] || ''} - ${row[2] || ''}`;
+                    const qtd = row[4] || 0;
+                    const requisicao = String(row[5] || '').trim(); 
+                    const oc = String(row[9] || '').trim(); 
+                    const dataEntrega = excelDateToJSDate(row[12]);
+
+                    let transObj = transmissionsMap.get(transmissao);
+                    if (!transObj) {
+                        transObj = {
+                            id: transmissao,
+                            linhaOp: 'Desconhecida',
+                            descricao: 'Somente Comercial',
+                            construtivo: null,
+                            comerciais: []
+                        };
+                        transmissionsMap.set(transmissao, transObj);
+                    }
+
+                    transObj.comerciais.push({
+                        descricao: descPN,
+                        quantidade: qtd,
+                        requisicao: requisicao,
+                        oc: oc,
+                        dataEntrega: dataEntrega
+                    });
+                }
+            };
+
+            processComerciaisSheet(state.rawFile2Data1);
+            processComerciaisSheet(state.rawFile2Data2);
+
+            // Determinar status dos 6 estágios para cada Card
+            const today = new Date();
+            state.processedData = Array.from(transmissionsMap.values()).map(card => {
+                
+                let hasDelayedCommercial = false;
+                let hasMissingReq = false;
+                let hasMissingOC = false;
+                let allComerciaisComplete = card.comerciais.length > 0;
+                
+                card.comerciais.forEach(c => {
+                    if (!c.requisicao || c.requisicao === '') hasMissingReq = true;
+                    if (c.requisicao && !c.oc) hasMissingOC = true;
+                    if (!c.oc) allComerciaisComplete = false;
+
+                    if (c.dataEntrega && c.dataEntrega < today && !c.oc) {
+                        hasDelayedCommercial = true;
+                    }
+                });
+
+                let purchasingStatus = 'Complete';
+                if (card.comerciais.length === 0) purchasingStatus = 'Complete'; 
+                else if (hasMissingReq) purchasingStatus = 'On delayed'; 
+                else if (hasMissingOC) purchasingStatus = 'Ongoing'; 
+                
+                let commercialStatus = 'Complete';
+                if (card.comerciais.length > 0) {
+                    if (hasDelayedCommercial) commercialStatus = 'On delayed';
+                    else if (!allComerciaisComplete) commercialStatus = 'Ongoing';
+                }
+
+                let constructivesStatus = 'Complete';
+                if (card.construtivo) {
+                    const st = card.construtivo.statusGeral.toLowerCase();
+                    if (st.includes('atrasa') || (card.construtivo.reprogramacao && card.construtivo.reprogramacao < today)) {
+                        constructivesStatus = 'On delayed';
+                    } else if (st === '1' || st === '100%' || st.includes('conclu')) {
+                        constructivesStatus = 'Complete';
+                    } else {
+                        constructivesStatus = 'Ongoing';
+                    }
+                }
+
+                let engineeringStatus = 'Complete'; 
+                let manufacturingStatus = constructivesStatus === 'Complete' ? 'Ongoing' : 'Ongoing';
+                if(constructivesStatus === 'Complete' && commercialStatus === 'Complete') manufacturingStatus = 'Complete';
+                
+                let deliveryStatus = 'Ongoing';
+                if (manufacturingStatus === 'Complete') deliveryStatus = 'Complete';
+
+                const stages = [engineeringStatus, purchasingStatus, commercialStatus, constructivesStatus, manufacturingStatus, deliveryStatus];
+                let overallStatus = 'Ongoing';
+                if (stages.every(s => s === 'Complete')) overallStatus = 'Complete';
+                else if (stages.some(s => s === 'On delayed')) overallStatus = 'On delayed';
+
+                return {
+                    ...card,
+                    stages: {
+                        Engineering: engineeringStatus,
+                        Purchasing: purchasingStatus,
+                        Commercial: commercialStatus,
+                        Constructives: constructivesStatus,
+                        Manufacturing: manufacturingStatus,
+                        Delivery: deliveryStatus
+                    },
+                    overallStatus: overallStatus
+                };
+            });
+
+            populateFilters();
+            renderDashboard();
+        }
+
+        // --- UI Rendering ---
+
+        function populateFilters() {
+            const linhaSelect = document.getElementById('filter-linha');
+            linhaSelect.innerHTML = '<option value="">Todas as Linhas / OP</option>';
+            const sortedLinhas = Array.from(state.uniqueLinhas).sort();
+            sortedLinhas.forEach(linha => {
+                if(linha) {
+                    const opt = document.createElement('option');
+                    opt.value = linha;
+                    opt.textContent = linha;
+                    linhaSelect.appendChild(opt);
+                }
+            });
+        }
+
+        // Event Listeners para Filtros
+        document.getElementById('filter-transmissao').addEventListener('input', (e) => {
+            state.filters.transmissao = e.target.value.toLowerCase();
+            renderDashboard();
+        });
+
+        document.getElementById('filter-linha').addEventListener('change', (e) => {
+            state.filters.linha = e.target.value;
+            renderDashboard();
+        });
+
+        document.querySelectorAll('.status-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+                
+                const target = e.currentTarget;
+                target.classList.add('active');
+                
+                state.filters.status = target.getAttribute('data-status');
+                renderDashboard();
+            });
+        });
+
+        function renderDashboard() {
+            const container = document.getElementById('cards-container');
+            const emptyState = document.getElementById('empty-state');
+            container.innerHTML = '';
+
+            // Apply Filters
+            const filteredData = state.processedData.filter(card => {
+                const matchBusca = card.id.toLowerCase().includes(state.filters.transmissao) || card.descricao.toLowerCase().includes(state.filters.transmissao);
+                const matchLinha = state.filters.linha === '' || card.linhaOp === state.filters.linha;
+                const matchStatus = state.filters.status === 'all' || card.overallStatus === state.filters.status;
+                return matchBusca && matchLinha && matchStatus;
+            });
+
+            // Update Stats
+            document.getElementById('stat-total').textContent = filteredData.length;
+            document.getElementById('stat-ongoing').textContent = filteredData.filter(c => c.overallStatus === 'Ongoing').length;
+            document.getElementById('stat-delayed').textContent = filteredData.filter(c => c.overallStatus === 'On delayed').length;
+            document.getElementById('stat-complete').textContent = filteredData.filter(c => c.overallStatus === 'Complete').length;
+
+            if (filteredData.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                filteredData.forEach(card => {
+                    container.appendChild(createCardElement(card));
+                });
+            }
+        }
+
+        function getStatusColorClass(status, type = 'border') {
+            switch(status) {
+                case 'Complete': return type === 'border' ? 'border-complete' : 'bg-complete';
+                case 'On delayed': return type === 'border' ? 'border-delayed' : 'bg-delayed';
+                case 'Ongoing': return type === 'border' ? 'border-ongoing' : 'bg-ongoing';
+                default: return '';
+            }
+        }
+
+        function createCardElement(card) {
+            const el = document.createElement('div');
+            el.className = `card ${getStatusColorClass(card.overallStatus, 'border')}`;
+            
+            const stagesHtml = ['Engineering', 'Purchasing', 'Commercial', 'Constructives', 'Manufacturing', 'Delivery'].map(stage => {
+                const status = card.stages[stage];
+                const colorClasses = getStatusColorClass(status, 'badge');
+                let icon = '';
+                if(status === 'Complete') icon = '<i data-lucide="check-circle-2" class="icon-inline"></i>';
+                else if(status === 'On delayed') icon = '<i data-lucide="alert-circle" class="icon-inline"></i>';
+                else icon = '<i data-lucide="clock" class="icon-inline"></i>';
+
+                return `
+                    <div class="stage-box ${colorClasses}">
+                        <span class="stage-title">${stage}</span>
+                        <div class="stage-status">${icon} ${status}</div>
                     </div>
-                    <div class="header-filters">
-                        <select id="filter-client" class="header-select">
-                            <option value="all">Todos os Clientes</option>
-                        </select>
-                        <select id="filter-makebuy" class="header-select">
-                            <option value="all">Make & Buy</option>
-                            <option value="MAKE">Apenas MAKE</option>
-                            <option value="BUY">Apenas BUY</option>
-                        </select>
-                    </div>
-                </div>
-            </header>
+                `;
+            }).join('');
 
-            <div id="kpi-section" class="kpi-bar">
-                <div class="kpi-card">
-                    <div class="kpi-label">Total de Itens</div>
-                    <div class="kpi-value" id="kpi-items">0</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-label">Horas disponiveis</div>
-                    <div class="kpi-value" id="kpi-hours">0h</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-label">Orcamento planejado</div>
-                    <div class="kpi-value" id="kpi-value">R$ 0</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-label">Itens em atraso</div>
-                    <div class="kpi-value text-red" id="kpi-risk">0</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-label" style="display: flex; align-items: center; gap: 5px;">
-                        Eficiencia Fluxo
-                        <div class="tooltip-container">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tooltip-icon">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                            </svg>
-                            <div class="tooltip-text">
-                                <strong>Como e calculado?</strong><br>
-                                E a soma do progresso das 6 etapas (3D, Mat, Min, Bordo, Mont, Qual) de todos os itens listados, dividida pela pontuacao maxima possivel. Cada etapa concluida vale 1 ponto.
-                            </div>
+            let extraInfo = '';
+            if (card.construtivo) {
+                extraInfo = `
+                    <div class="card-footer">
+                        <div class="card-footer-item" title="Início Construtivo">
+                            <i data-lucide="calendar" class="icon-inline"></i> Início: <span>${formatJSDate(card.construtivo.inicio)}</span>
+                        </div>
+                        <div class="card-footer-item" title="Entrega Final">
+                            <i data-lucide="flag" class="icon-inline"></i> Fim: <span>${formatJSDate(card.construtivo.entregaFinal)}</span>
                         </div>
                     </div>
-                    <div class="kpi-value text-green" id="kpi-efficiency">0%</div>
-                    <div class="kpi-sub">Progresso Global</div>
-                </div>
-            </div>
+                `;
+            }
 
-            <!-- DASHBOARD VIEW -->
-            <div id="view-tracker" class="view-section content-scroll">
-                <div class="view-header">
-                    <span class="item-count" id="item-count">0 itens</span>
+            el.innerHTML = `
+                <div class="card-header">
+                    <div>
+                        <span class="card-tag">${card.linhaOp}</span>
+                        <h3 class="card-title">${card.id}</h3>
+                    </div>
                 </div>
-                <div id="tracker-content-area" class="cards-wrapper"></div>
-                <div id="empty-state" class="empty-state hidden">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                    <h3>Nenhum item encontrado</h3>
-                    <p>Tente ajustar os filtros ou a busca.</p>
+                <p class="card-desc" title="${card.descricao}">${card.descricao || 'Sem descrição'}</p>
+                
+                <div class="card-stages">
+                    ${stagesHtml}
                 </div>
-            </div>
+                
+                ${extraInfo}
+            `;
+            
+            setTimeout(() => lucide.createIcons({ root: el }), 0);
 
-            <!-- TABLE VIEW -->
-            <div id="view-table" class="view-section hidden generic-padding">
-                <div class="table-header-row">
-                    <h2 class="section-title">Lista Tabular Detalhada</h2>
-                    <span class="item-count" id="table-item-count">0 itens</span>
-                </div>
-                <div class="table-container">
-                    <table class="data-table" id="data-table">
-                        <thead>
-                            <tr>
-                                <th data-sort="id">ID <span class="sort-icon"></span></th>
-                                <th data-sort="client">Cliente <span class="sort-icon"></span></th>
-                                <th data-sort="transmission">Transmissao <span class="sort-icon"></span></th>
-                                <th data-sort="op">Operacao <span class="sort-icon"></span></th>
-                                <th data-sort="desc">Descricao <span class="sort-icon"></span></th>
-                                <th data-sort="makeBuy">Make/Buy <span class="sort-icon"></span></th>
-                                <th data-sort="supplier">Fornecedor <span class="sort-icon"></span></th>
-                                <th data-sort="dateSupplier">Entrega Fornecedor <span class="sort-icon"></span></th>
-                                <th data-sort="dateFinal">Entrega Final <span class="sort-icon"></span></th>
-                                <th>Pipeline</th>
-                                <th data-sort="status">Status <span class="sort-icon"></span></th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-body"></tbody>
-                    </table>
-                </div>
-            </div>
+            return el;
+        }
 
-        </main>
-    </div>
+        // --- Demo Data Generator ---
+        function loadDemoData() {
+            uploadFeedback.textContent = "A carregar dados de exemplo...";
+            
+            state.uniqueLinhas = new Set(['AUFBAU', 'BODYSIDE', 'STW']);
+            
+            state.processedData = [
+                {
+                    id: 'VW427-PATAGONIA-AUFBAU-0035-2025',
+                    linhaOp: 'AUFBAU',
+                    descricao: 'DISPOSITIVO INDEX. UNDERBODY',
+                    overallStatus: 'Complete',
+                    stages: { Engineering: 'Complete', Purchasing: 'Complete', Commercial: 'Complete', Constructives: 'Complete', Manufacturing: 'Complete', Delivery: 'Complete' },
+                    construtivo: { inicio: new Date(), entregaFinal: new Date(new Date().setDate(new Date().getDate() + 10)) }
+                },
+                {
+                    id: 'VW247-PATAGONIA-BODYSIDE-0001-2025',
+                    linhaOp: 'BODYSIDE',
+                    descricao: 'GRAMPO PNEUMATICO V2 63.1',
+                    overallStatus: 'On delayed',
+                    stages: { Engineering: 'Complete', Purchasing: 'On delayed', Commercial: 'Ongoing', Constructives: 'Complete', Manufacturing: 'Ongoing', Delivery: 'Ongoing' },
+                    construtivo: { inicio: new Date(), entregaFinal: new Date() }
+                },
+                {
+                    id: 'VW427-PATAGONIA-AUFBAU-0041-2025',
+                    linhaOp: 'AUFBAU',
+                    descricao: 'GUIA TELESCOPICA',
+                    overallStatus: 'Ongoing',
+                    stages: { Engineering: 'Complete', Purchasing: 'Complete', Commercial: 'Ongoing', Constructives: 'Ongoing', Manufacturing: 'Ongoing', Delivery: 'Ongoing' },
+                    construtivo: { inicio: new Date(), entregaFinal: new Date(new Date().setDate(new Date().getDate() + 30)) }
+                },
+                {
+                    id: 'BB37-VW-ANCH-STW-UB2-0002-2025',
+                    linhaOp: 'STW',
+                    descricao: 'SUPORTE MALA',
+                    overallStatus: 'On delayed',
+                    stages: { Engineering: 'Complete', Purchasing: 'Complete', Commercial: 'Complete', Constructives: 'On delayed', Manufacturing: 'Ongoing', Delivery: 'Ongoing' },
+                    construtivo: { inicio: new Date(), entregaFinal: new Date(new Date().setDate(new Date().getDate() - 5)) }
+                },
+                {
+                    id: 'VW427-PATAGONIA-AUFBAU-0003-2025',
+                    linhaOp: 'AUFBAU',
+                    descricao: 'GUIA LINEAR SHS20',
+                    overallStatus: 'Ongoing',
+                    stages: { Engineering: 'Complete', Purchasing: 'Ongoing', Commercial: 'Complete', Constructives: 'Ongoing', Manufacturing: 'Ongoing', Delivery: 'Ongoing' },
+                    construtivo: null
+                }
+            ];
 
-    <script src="script.js"></script>
+            setTimeout(() => {
+                document.getElementById('file1-status').innerHTML = `<i data-lucide="check-circle" class="icon-sm text-green"></i> Construtivos: <span class="text-green">Demo</span>`;
+                document.getElementById('file2-status').innerHTML = `<i data-lucide="check-circle" class="icon-sm text-green"></i> Comerciais: <span class="text-green">Demo</span>`;
+                lucide.createIcons();
+                
+                populateFilters();
+                renderDashboard();
+                document.getElementById('drop-zone-overlay').classList.add('hidden');
+                document.getElementById('dashboard-workspace').classList.remove('hidden');
+            }, 600);
+        }
+
+    </script>
 </body>
 </html>
