@@ -10,997 +10,725 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         
         /* === CSS RESET & BASE === */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #f3f4f6; 
-            color: #1f2937;
-            height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden; 
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; color: #1f2937; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         .hidden { display: none !important; }
-        
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
 
-        /* === ICONS === */
+        /* === ICONS & COLORS === */
         .icon-sm { width: 1rem; height: 1rem; }
+        .icon-md { width: 1.25rem; height: 1.25rem; }
         .icon-lg { width: 2rem; height: 2rem; object-fit: contain; }
         .icon-xl { width: 4rem; height: 4rem; }
         .icon-inline { display: inline-block; vertical-align: text-bottom; width: 0.875rem; height: 0.875rem; margin-right: 0.25rem; }
         
-        .text-yellow { color: #facc15; }
-        .text-blue { color: #3b82f6; }
-        .text-green { color: #4ade80; }
-        .text-red { color: #f87171; }
+        .text-yellow { color: #eab308; } .text-blue { color: #3b82f6; } .text-green { color: #22c55e; } 
+        .text-red { color: #ef4444; } .text-slate { color: #64748b; } .text-purple { color: #a855f7; } .text-indigo { color: #6366f1; } .text-orange { color: #f97316; }
 
         /* === HEADER === */
-        .app-header {
-            background-color: #1e3a8a;
-            color: white;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            z-index: 10;
-            padding: 1rem 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        .app-header { background-color: #1e3a8a; color: white; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); z-index: 10; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+        .header-title-wrapper { display: flex; align-items: center; gap: 0.75rem; }
+        .header-title { font-size: 1.5rem; font-weight: 800; letter-spacing: 0.05em; }
+        .header-subtitle { font-size: 0.875rem; font-weight: 400; color: #bfdbfe; margin-left: 0.5rem; }
+        .header-badges { display: flex; gap: 1rem; }
+        .status-badge-top { font-size: 0.875rem; background-color: #1e40af; padding: 0.25rem 0.75rem; border-radius: 0.25rem; display: flex; align-items: center; gap: 0.5rem; }
 
-        .header-title-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .header-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-        }
-
-        .header-subtitle {
-            font-size: 0.875rem;
-            font-weight: 400;
-            color: #bfdbfe;
-            margin-left: 0.5rem;
-        }
-
-        .header-badges {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .status-badge-top {
-            font-size: 0.875rem;
-            background-color: #1e40af;
-            padding: 0.25rem 0.75rem;
-            border-radius: 0.25rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .status-badge-top span { font-weight: 700; }
-
-        /* === MAIN LAYOUT === */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* === DROP ZONE OVERLAY === */
-        .overlay {
-            position: absolute;
-            inset: 0;
-            background-color: #f9fafb;
-            z-index: 20;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 1.5rem;
-        }
-
-        .drop-zone {
-            background-color: white;
-            border-radius: 0.75rem;
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-            padding: 2.5rem;
-            text-align: center;
-            border: 2px dashed #9ca3af;
-            transition: all 0.3s ease;
-            width: 100%;
-            max-width: 42rem;
-        }
-
-        .drop-zone.dragover {
-            border-color: #3b82f6;
-            background-color: #eff6ff;
-        }
-
+        /* === MAIN LAYOUT & UPLOAD === */
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .overlay { position: absolute; inset: 0; background-color: #f9fafb; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; }
+        .drop-zone { background-color: white; border-radius: 0.75rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); padding: 2.5rem; text-align: center; border: 2px dashed #9ca3af; transition: all 0.3s ease; width: 100%; max-width: 48rem; }
+        .drop-zone.dragover { border-color: #3b82f6; background-color: #eff6ff; }
         .drop-zone h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem; }
-        .drop-zone p { color: #6b7280; margin-bottom: 1.5rem; line-height: 1.5; }
-        .drop-zone span { font-weight: 500; color: #374151; }
+        .drop-zone p { color: #6b7280; margin-bottom: 1.5rem; line-height: 1.5; font-size: 0.9rem;}
+        .drop-zone span { font-weight: 600; color: #374151; }
+        .btn-group { display: flex; justify-content: center; gap: 1rem; margin-top: 1rem; }
+        .btn { cursor: pointer; padding: 0.5rem 1.5rem; border-radius: 0.5rem; font-weight: 500; font-size: 1rem; transition: background-color 0.2s; border: none; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn-primary { background-color: #2563eb; color: white; } .btn-primary:hover { background-color: #1d4ed8; }
+        .btn-secondary { background-color: #e5e7eb; color: #1f2937; } .btn-secondary:hover { background-color: #d1d5db; }
+        .upload-feedback { margin-top: 1rem; font-size: 0.875rem; color: #2563eb; font-weight: 500; height: 1.5rem; }
 
-        .btn-group {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .btn {
-            cursor: pointer;
-            padding: 0.5rem 1.5rem;
-            border-radius: 0.5rem;
-            font-weight: 500;
-            font-size: 1rem;
-            transition: background-color 0.2s;
-            border: none;
-            display: inline-block;
-        }
-
-        .btn-primary { background-color: #2563eb; color: white; }
-        .btn-primary:hover { background-color: #1d4ed8; }
+        /* === DASHBOARD === */
+        .dashboard-workspace { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .filters-bar { background-color: white; border-bottom: 1px solid #e5e7eb; padding: 0.75rem 1.5rem; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); }
+        .filter-label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 600; color: #4b5563; text-transform: uppercase; }
+        .filter-input, .filter-select { border: 1px solid #d1d5db; border-radius: 0.25rem; padding: 0.375rem 0.75rem; font-size: 0.8rem; outline: none; }
+        .filter-input { width: 14rem; } .filter-input:focus, .filter-select:focus { border-color: #3b82f6; }
+        .filter-select { min-width: 10rem; }
         
-        .btn-secondary { background-color: #e5e7eb; color: #1f2937; }
-        .btn-secondary:hover { background-color: #d1d5db; }
+        .stats-grid { padding: 1rem 1.5rem 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+        .stat-card { background-color: white; border-radius: 0.5rem; padding: 0.75rem 1rem; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); border-left: 4px solid #d1d5db; cursor: pointer; transition: all 0.2s ease; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.08); }
+        .stat-card.selected { background-color: #f0fdf4; border-color: #22c55e; box-shadow: 0 0 0 1px #22c55e; }
+        .stat-card.blue.selected { background-color: #eff6ff; border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f6; }
+        .stat-card.yellow.selected { background-color: #fefce8; border-color: #eab308; box-shadow: 0 0 0 1px #eab308; }
+        .stat-card.red.selected { background-color: #fef2f2; border-color: #ef4444; box-shadow: 0 0 0 1px #ef4444; }
+        .stat-card.blue { border-left-color: #3b82f6; } .stat-card.yellow { border-left-color: #eab308; } .stat-card.red { border-left-color: #ef4444; } .stat-card.green { border-left-color: #22c55e; }
+        .stat-title { font-size: 0.75rem; color: #6b7280; text-transform: uppercase; font-weight: 600; }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: #1f2937; margin-top: 0.25rem; }
 
-        .upload-feedback {
-            margin-top: 1rem;
-            font-size: 0.875rem;
-            color: #2563eb;
-            font-weight: 500;
-            height: 1.5rem;
-        }
+        .cards-wrapper { flex: 1; overflow-y: auto; padding: 1.5rem; }
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; }
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #9ca3af; }
 
-        /* === DASHBOARD WORKSPACE === */
-        .dashboard-workspace {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
+        /* === CARD === */
+        .card { background-color: white; border-radius: 0.75rem; box-shadow: 0 2px 4px 0 rgba(0,0,0,0.05); border: 1px solid #e5e7eb; display: flex; flex-direction: column; padding: 1.25rem; cursor: pointer; position: relative; overflow: hidden; transition: all 0.2s ease;}
+        .card:hover { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); transform: translateY(-3px); border-color: #cbd5e1; }
+        .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background-color: #d1d5db; }
+        .card.border-complete::before { background-color: #22c55e; } .card.border-delayed::before { background-color: #ef4444; } .card.border-ongoing::before { background-color: #eab308; }
+        
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; }
+        .card-tag { display: inline-block; padding: 0.25rem 0.6rem; background-color: #f1f5f9; color: #475569; border-radius: 999px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; }
+        .card-status-badge { font-size: 0.7rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 999px; display: flex; align-items: center; gap: 0.25rem; }
+        .card-title { font-weight: 800; color: #0f172a; font-size: 1rem; line-height: 1.3; word-break: break-all; margin-bottom: 0.25rem; }
+        .card-desc { font-size: 0.8rem; color: #64748b; margin-bottom: 1.25rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .card-stages { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-top: auto; }
+        .stage-box { border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.5rem; display: flex; flex-direction: column; justify-content: center; background-color: #f8fafc; }
+        .stage-title { font-size: 0.6rem; text-transform: uppercase; font-weight: 700; color: #64748b; }
+        .stage-status { font-weight: 600; font-size: 0.75rem; margin-top: 0.25rem; display: flex; align-items: center; }
+        .card-footer { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; font-size: 0.75rem; color: #64748b; }
+        .view-details-btn { width: 100%; margin-top: 1rem; padding: 0.5rem; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-size: 0.8rem; font-weight: 600; color: #475569; display: flex; align-items: center; justify-content: center; gap: 0.25rem; transition: all 0.2s; }
+        .card:hover .view-details-btn { background-color: #e2e8f0; color: #0f172a; }
 
-        /* Filters Bar */
-        .filters-bar {
-            background-color: white;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 0.75rem 1.5rem;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 1rem;
-            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
-        }
+        /* === MODAL ERGONOMICS (4 COLUMNS) === */
+        .modal-overlay { position: fixed; inset: 0; background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 2rem; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-content { background-color: white; border-radius: 1rem; width: 100%; max-width: 90rem; max-height: 94vh; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); transform: scale(0.95); transition: transform 0.3s ease; overflow: hidden; }
+        .modal-overlay.active .modal-content { transform: scale(1); }
 
-        .filter-label {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: #4b5563;
-            text-transform: uppercase;
-        }
+        .modal-header { padding: 1.5rem 2rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: flex-start; background-color: #f8fafc; }
+        .modal-header-info { flex: 1; }
+        .modal-title { font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 0.25rem 0; }
+        .modal-close { background: none; border: none; color: #64748b; cursor: pointer; padding: 0.5rem; border-radius: 0.5rem; transition: background 0.2s; }
+        .modal-close:hover { background-color: #e2e8f0; color: #0f172a; }
 
-        .filter-input {
-            border: 1px solid #d1d5db;
-            border-radius: 0.25rem;
-            padding: 0.375rem 0.75rem;
-            font-size: 0.875rem;
-            width: 16rem;
-            outline: none;
-        }
+        .badge-outline { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.2rem 0.5rem; border: 1px solid #cbd5e1; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600; color: #475569; background-color: white; }
+        .badge-outline.priority-high { border-color: #fca5a5; color: #dc2626; background-color: #fef2f2; }
+        
+        /* Saturation Badge Logic */
+        .badge-sat-green { border-color: #bbf7d0; color: #16a34a; background-color: #dcfce7; }
+        .badge-sat-yellow { border-color: #fef08a; color: #ca8a04; background-color: #fef9c3; }
+        .badge-sat-red { border-color: #fecaca; color: #dc2626; background-color: #fee2e2; }
 
-        .filter-select {
-            border: 1px solid #d1d5db;
-            border-radius: 0.25rem;
-            padding: 0.375rem 0.75rem;
-            font-size: 0.875rem;
-            outline: none;
-        }
+        .modal-body { padding: 1.5rem 2rem; overflow-y: auto; flex: 1; background-color: #f1f5f9; }
+        
+        .e2e-stepper { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; position: relative; background: white; padding: 1.5rem; border-radius: 0.75rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(0,0,0,0.05);}
+        .e2e-stepper::before { content: ''; position: absolute; top: 2.75rem; left: 3rem; right: 3rem; height: 3px; background-color: #e2e8f0; z-index: 1; }
+        .step { display: flex; flex-direction: column; align-items: center; z-index: 2; position: relative; width: 6rem; }
+        .step-icon-wrapper { width: 3rem; height: 3rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; background-color: white; border: 3px solid #e2e8f0; color: #94a3b8; transition: all 0.3s; }
+        .step-label { font-size: 0.7rem; font-weight: 700; color: #64748b; margin-top: 0.75rem; text-transform: uppercase; text-align: center; }
+        
+        .step.complete .step-icon-wrapper { border-color: #22c55e; background-color: #dcfce7; color: #16a34a; } .step.complete .step-label { color: #16a34a; }
+        .step.ongoing .step-icon-wrapper { border-color: #eab308; background-color: #fef9c3; color: #ca8a04; } .step.ongoing .step-label { color: #ca8a04; }
+        .step.delayed .step-icon-wrapper { border-color: #ef4444; background-color: #fee2e2; color: #dc2626; } .step.delayed .step-label { color: #dc2626; }
 
-        .filter-input:focus, .filter-select:focus { border-color: #3b82f6; }
+        /* 4-COLUMN LAYOUT GRID */
+        .details-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 1.5rem; }
+        .detail-section { background-color: #fff; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .detail-section.full-width { grid-column: span 4; }
+        .detail-section h4 { font-size: 0.95rem; font-weight: 800; color: #0f172a; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 2px solid #f1f5f9; padding-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;}
+        
+        .info-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; font-size: 0.8rem; border-bottom: 1px dashed #e2e8f0; padding-bottom: 0.5rem;}
+        .info-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .info-label { color: #64748b; font-weight: 500; }
+        .info-val { color: #0f172a; font-weight: 700; text-align: right; max-width: 60%; line-height: 1.2;}
+        .info-val.badge-status { padding: 0.15rem 0.5rem; border-radius: 0.25rem; font-size: 0.7rem; border: 1px solid #cbd5e1; background: #f8fafc;}
 
-        .status-filters {
-            display: flex;
-            background-color: #f3f4f6;
-            padding: 0.25rem;
-            border-radius: 0.5rem;
-            gap: 0.25rem;
-            margin-left: auto;
-        }
-
-        .status-btn {
-            padding: 0.25rem 0.75rem;
-            border-radius: 0.25rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: #4b5563;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .status-btn:hover { background-color: #e5e7eb; }
-        .status-btn.active {
-            background-color: white;
-            color: #1f2937;
-            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            padding: 1rem 1.5rem 0;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-        }
-
-        .stat-card {
-            background-color: white;
-            border-radius: 0.25rem;
-            padding: 0.75rem;
-            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
-            border-left: 4px solid #d1d5db;
-            cursor: pointer;
-            transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.08s ease;
-        }
-
-        .stat-card:hover {
-            background-color: #f3f4f6;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-        }
-
-        .stat-card:active {
-            transform: scale(0.98);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-
-        .stat-card.blue { border-left-color: #3b82f6; }
-        .stat-card.yellow { border-left-color: #eab308; }
-        .stat-card.red { border-left-color: #ef4444; }
-        .stat-card.green { border-left-color: #22c55e; }
-
-        .stat-title {
-            font-size: 0.75rem;
-            color: #6b7280;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #1f2937;
-            margin-top: 0.25rem;
-        }
-
-        /* Cards Container */
-        .cards-wrapper {
-            flex: 1;
-            overflow-y: auto;
-            padding: 1.5rem;
-        }
-
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: #9ca3af;
-        }
-
-        .empty-state p { font-size: 1.125rem; font-weight: 500; margin-top: 1rem; }
-
-        /* Card Component */
-        .card {
-            background-color: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1);
-            border-left: 8px solid #d1d5db;
-            display: flex;
-            flex-direction: column;
-            padding: 1rem;
-            transition: box-shadow 0.2s;
-            height: 100%;
-        }
-
-        .card:hover { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 0.5rem;
-        }
-
-        .card-tag {
-            display: inline-block;
-            padding: 0.125rem 0.5rem;
-            background-color: #f3f4f6;
-            color: #4b5563;
-            border-radius: 0.25rem;
-            font-size: 0.625rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 0.25rem;
-        }
-
-        .card-title {
-            font-weight: 700;
-            color: #1f2937;
-            font-size: 0.875rem;
-            line-height: 1.2;
-            word-break: break-all;
-        }
-
-        .card-desc {
-            font-size: 0.75rem;
-            color: #6b7280;
-            margin-bottom: 1rem;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .card-stages {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.5rem;
-            margin-top: auto;
-        }
-
-        .stage-box {
-            border: 1px solid #e5e7eb;
-            border-radius: 0.25rem;
-            padding: 0.5rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .stage-title {
-            font-size: 0.625rem;
-            text-transform: uppercase;
-            font-weight: 700;
-            opacity: 0.75;
-            line-height: 1.2;
-        }
-
-        .stage-status {
-            font-weight: 500;
-            font-size: 0.75rem;
-            margin-top: 0.25rem;
-            display: flex;
-            align-items: center;
-        }
-
-        .card-footer {
-            margin-top: 1rem;
-            padding-top: 0.75rem;
-            border-top: 1px solid #f3f4f6;
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.75rem;
-            color: #6b7280;
-        }
-
-        .card-footer-item span {
-            font-weight: 500;
-            color: #374151;
-        }
+        .items-list { margin-top: 0.5rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 0.75rem; }
+        .item-row { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.75rem; font-size: 0.75rem; }
+        .item-title { font-weight: 700; color: #334155; margin-bottom: 0.5rem; line-height: 1.3; }
+        .item-meta { display: flex; flex-wrap: wrap; gap: 0.5rem; color: #64748b; }
+        .item-meta span { display: flex; align-items: center; gap: 0.25rem; background: #fff; border: 1px solid #cbd5e1; padding: 0.2rem 0.5rem; border-radius: 0.25rem;}
 
         /* Status Colors / Themes */
-        .border-complete { border-left-color: #22c55e !important; }
-        .bg-complete { background-color: #dcfce7; color: #166534; border-color: #bbf7d0; }
-        
-        .border-delayed { border-left-color: #ef4444 !important; }
-        .bg-delayed { background-color: #fee2e2; color: #991b1b; border-color: #fecaca; }
-        
-        .border-ongoing { border-left-color: #facc15 !important; }
-        .bg-ongoing { background-color: #fef9c3; color: #854d0e; border-color: #fef08a; }
+        .border-complete { border-left-color: #22c55e !important; } .bg-complete { background-color: #dcfce7; color: #16a34a; border-color: #bbf7d0; }
+        .border-delayed { border-left-color: #ef4444 !important; } .bg-delayed { background-color: #fee2e2; color: #dc2626; border-color: #fecaca; }
+        .border-ongoing { border-left-color: #eab308 !important; } .bg-ongoing { background-color: #fef9c3; color: #ca8a04; border-color: #fef08a; }
 
-        @media (max-width: 1024px) {
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .filters-bar { flex-direction: column; align-items: stretch; }
-            .status-filters { margin-left: 0; justify-content: space-between; }
-        }
+        @media (max-width: 1400px) { .details-grid { grid-template-columns: repeat(2, 1fr); } .detail-section.full-width { grid-column: span 2; } }
+        @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .details-grid { grid-template-columns: 1fr; } .detail-section.full-width { grid-column: span 1; } }
     </style>
 </head>
 <body>
 
-    <!-- Navbar -->
     <header class="app-header">
         <div class="header-title-wrapper">
-            <img src="logo-comau.png" class="icon-lg" alt="Logo Comau" onerror="this.outerHTML='<i data-lucide=\'boxes\' class=\'icon-lg text-yellow\'></i>'">
-            <h1 class="header-title">SUPPLY CHAIN TRACKER <span class="header-subtitle">COMAU</span></h1>
+            <i data-lucide="layers" class="icon-lg text-yellow"></i>
+            <h1 class="header-title">SUPPLY CHAIN TRACKER <span class="header-subtitle">ERP COMAU</span></h1>
         </div>
         <div class="header-badges">
-            <div class="status-badge-top" id="file1-status">
-                <i data-lucide="file-spreadsheet" class="icon-sm"></i> Construtivos: <span class="text-red">Pendente</span>
-            </div>
-            <div class="status-badge-top" id="file2-status">
-                <i data-lucide="file-spreadsheet" class="icon-sm"></i> Comerciais: <span class="text-red">Pendente</span>
-            </div>
+            <div class="status-badge-top" id="badge-system"><i data-lucide="database" class="icon-sm"></i> Banco de Dados: <span class="text-red">Aguardando</span></div>
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="main-content">
-        
-        <!-- Drop Zone Overlay -->
         <div id="drop-zone-overlay" class="overlay">
             <div class="drop-zone" id="drop-zone">
-                <i data-lucide="upload-cloud" class="icon-xl text-blue" style="margin: 0 auto 1rem auto;"></i>
-                <h2>Arraste e solte os seus ficheiros aqui</h2>
+                <i data-lucide="folder-sync" class="icon-xl text-blue" style="margin: 0 auto 1rem auto;"></i>
+                <h2>Leitura Inteligente de Planilhas</h2>
                 <p>
-                    Para gerar o dashboard, envie:<br>
-                    1. <span>Uma (1) planilha de Follow-up Construtivos</span><br>
-                    2. <span>Uma ou várias planilhas de Comerciais</span>
+                    Arraste <strong>TODOS</strong> os seus arquivos Excel de uma vez.<br/>
+                    O sistema buscará automaticamente pelas abas: <i>Follow up, Saturação, Bordomaquina, Comerciais, PRPO...</i>
                 </p>
                 <div class="btn-group">
-                    <label class="btn btn-primary">
-                        Procurar Ficheiros
+                    <label class="btn btn-primary"><i data-lucide="upload" class="icon-sm"></i> Enviar Arquivos
                         <input type="file" id="file-input" multiple accept=".xlsx, .xls, .csv" class="hidden">
                     </label>
-                    <button id="btn-demo" class="btn btn-secondary">
-                        Carregar Dados de Exemplo
-                    </button>
+                    <button id="btn-demo" class="btn btn-secondary"><i data-lucide="play" class="icon-sm"></i> Carregar Dados de Exemplo</button>
                 </div>
                 <div id="upload-feedback" class="upload-feedback"></div>
             </div>
         </div>
 
-        <!-- Dashboard Workspace -->
         <div id="dashboard-workspace" class="dashboard-workspace hidden">
-            <!-- Filters Bar -->
+            <!-- FUNIL DE FILTROS ATUALIZADO -->
             <div class="filters-bar">
-                <div class="filter-label">
-                    <i data-lucide="filter" class="icon-sm"></i>
-                    <span>Filtros</span>
-                </div>
+                <div class="filter-label"><i data-lucide="filter" class="icon-sm"></i> Filtros</div>
                 
-                <input type="text" id="filter-transmissao" placeholder="Procurar Transmissão..." class="filter-input">
+                <input type="text" id="filter-transmissao" placeholder="Procurar Transmissão / Part Number..." class="filter-input">
                 
+                <select id="filter-cliente" class="filter-select">
+                    <option value="">Todos os Clientes</option>
+                </select>
+
+                <select id="filter-wbs" class="filter-select">
+                    <option value="">Todos os Projetos WBS</option>
+                </select>
+
                 <select id="filter-linha" class="filter-select">
                     <option value="">Todas as Linhas / OP</option>
                 </select>
             </div>
 
-            <!-- Dashboard Stats -->
             <div class="stats-grid">
-                <div class="stat-card blue" data-status="all">
-                    <div class="stat-title">Total de Transmissões</div>
-                    <!-- Este ID foi mantido estático em relação aos filtros de status -->
-                    <div class="stat-value" id="stat-total">0</div>
-                </div>
-                <div class="stat-card yellow" data-status="Ongoing">
-                    <div class="stat-title">Ongoing</div>
-                    <div class="stat-value" id="stat-ongoing">0</div>
-                </div>
-                <div class="stat-card red" data-status="On delayed">
-                    <div class="stat-title">On Delayed</div>
-                    <div class="stat-value" id="stat-delayed">0</div>
-                </div>
-                <div class="stat-card green" data-status="Complete">
-                    <div class="stat-title">Complete</div>
-                    <div class="stat-value" id="stat-complete">0</div>
-                </div>
+                <div class="stat-card blue selected" data-status="all"><div class="stat-title">Total Transmissões</div><div class="stat-value" id="stat-total">0</div></div>
+                <div class="stat-card yellow" data-status="Ongoing"><div class="stat-title">Em Andamento</div><div class="stat-value" id="stat-ongoing">0</div></div>
+                <div class="stat-card red" data-status="On delayed"><div class="stat-title">Atrasados / Risco</div><div class="stat-value" id="stat-delayed">0</div></div>
+                <div class="stat-card green" data-status="Complete"><div class="stat-title">Concluídos (E2E)</div><div class="stat-value" id="stat-complete">0</div></div>
             </div>
 
-            <!-- Cards Container -->
             <div class="cards-wrapper">
-                <div id="cards-container" class="cards-grid">
-                    <!-- Cards injected here via JS -->
-                </div>
-                <div id="empty-state" class="empty-state hidden">
-                    <i data-lucide="search-x" class="icon-xl" style="margin-bottom: 1rem;"></i>
-                    <p>Nenhuma transmissão encontrada com os filtros atuais.</p>
-                </div>
+                <div id="cards-container" class="cards-grid"></div>
+                <div id="empty-state" class="empty-state hidden"><i data-lucide="search-x" class="icon-xl" style="margin-bottom: 1rem;"></i><p>Nenhum resultado para os filtros selecionados.</p></div>
             </div>
         </div>
     </main>
 
+    <!-- MODAL DETALHADO (4 COLUNAS) -->
+    <div id="card-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-header-info">
+                    <span class="card-tag" id="modal-linha">CLIENTE | LINHA / OP</span>
+                    <h2 class="modal-title" id="modal-title">TRANSMISSAO-ID</h2>
+                    <p class="card-desc" style="margin-bottom:0.5rem;" id="modal-desc">Descrição do Item</p>
+                    <div id="modal-extra-tags" style="display: flex; gap: 0.5rem; flex-wrap: wrap;"></div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 1rem;">
+                    <button class="modal-close" id="modal-close-btn"><i data-lucide="x" class="icon-md"></i></button>
+                    <div id="modal-overall-status" class="card-status-badge"></div>
+                </div>
+            </div>
+            
+            <div class="modal-body">
+                <div class="e2e-stepper" id="modal-stepper"></div>
+
+                <div class="details-grid">
+                    <div class="detail-section">
+                        <h4><i data-lucide="pen-tool" class="icon-sm text-purple"></i> Eng. & Projetos</h4>
+                        <div id="modal-eng-data"></div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h4><i data-lucide="wrench" class="icon-sm text-blue"></i> Construtivo Ext.</h4>
+                        <div id="modal-construtivo-data"></div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h4><i data-lucide="factory" class="icon-sm text-orange"></i> Bordo de Máquina (PCP)</h4>
+                        <div id="modal-pcp-data"></div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h4><i data-lucide="truck" class="icon-sm text-green"></i> Finanças & Logística</h4>
+                        <div id="modal-fin-data"></div>
+                    </div>
+
+                    <div class="detail-section full-width">
+                        <h4><i data-lucide="shopping-cart" class="icon-sm text-yellow"></i> Itens Comerciais (BOM) & NFs</h4>
+                        <div class="items-list" id="modal-comerciais-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-
             lucide.createIcons();
 
-            // Application State Atualizado para suportar várias planilhas de comerciais
+            // Estado Centralizado Expandido
             const state = {
-                rawFile1Data: null, // Construtivos (Apenas 1)
-                comerciaisDataSheets: [], // Array para guardar múltiplas abas/arquivos de Comerciais
+                extractedSheets: { followUp: [], saturacao: [], bordomaquina: [], comerciais: [], prpo: [] },
                 processedData: [],
-                filters: {
-                    transmissao: '',
-                    linha: '',
-                    status: 'all'
-                },
-                uniqueLinhas: new Set(),
-                comerciaisFilesCount: 0 // Contador visual para o usuário
+                filters: { transmissao: '', cliente: '', wbs: '', linha: '', status: 'all' },
+                uniqueClientes: new Set(),
+                uniqueWBS: new Set(),
+                uniqueLinhas: new Set()
             };
 
             const dropZone = document.getElementById('drop-zone');
             const fileInput = document.getElementById('file-input');
-            const uploadFeedback = document.getElementById('upload-feedback');
-
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                dropZone.addEventListener(eventName, preventDefaults, false);
-                document.body.addEventListener(eventName, preventDefaults, false);
+            const modalOverlay = document.getElementById('card-modal');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => {
+                dropZone.addEventListener(e, preventDefaults, false);
+                document.body.addEventListener(e, preventDefaults, false);
             });
-
             function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+            ['dragenter', 'dragover'].forEach(e => dropZone.addEventListener(e, () => dropZone.classList.add('dragover'), false));
+            ['dragleave', 'drop'].forEach(e => dropZone.addEventListener(e, () => dropZone.classList.remove('dragover'), false));
 
-            ['dragenter', 'dragover'].forEach(eventName => {
-                dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
-            });
-
-            ['dragleave', 'drop'].forEach(eventName => {
-                dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
-            });
-
-            dropZone.addEventListener('drop', handleDrop, false);
+            dropZone.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files), false);
             fileInput.addEventListener('change', (e) => handleFiles(e.target.files), false);
             document.getElementById('btn-demo').addEventListener('click', loadDemoData);
+            document.getElementById('modal-close-btn').addEventListener('click', () => modalOverlay.classList.remove('active'));
+            modalOverlay.addEventListener('click', (e) => { if(e.target === modalOverlay) modalOverlay.classList.remove('active'); });
 
-            function handleDrop(e) {
-                const dt = e.dataTransfer;
-                const files = dt.files;
-                handleFiles(files);
-            }
-
+            // Leitura de Arquivos Dinâmica (Smart Parser)
             async function handleFiles(files) {
-                uploadFeedback.textContent = "A processar ficheiros... Aguarde.";
+                document.getElementById('upload-feedback').textContent = "Lendo planilhas e procurando abas...";
                 
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    const name = file.name.toLowerCase();
-                    
+                for (let file of files) {
                     try {
-                        const data = await readExcel(file);
-                        
-                        // IDENTIFICA ARQUIVO CONSTRUTIVOS / FOLLOW UP
-                        if (name.includes('construtivo') || name.includes('follow')) {
-                            const firstSheetName = data.SheetNames[0];
-                            state.rawFile1Data = XLSX.utils.sheet_to_json(data.Sheets[firstSheetName], { header: 1 });
-                            document.getElementById('file1-status').innerHTML = `<i data-lucide="check-circle" class="icon-sm text-green"></i> Construtivos: <span class="text-green">Lido</span>`;
-                        } 
-                        // IDENTIFICA ARQUIVOS COMERCIAIS
-                        else if (name.includes('comerciai') || name.includes('controle')) {
-                            state.comerciaisFilesCount++;
-                            // Lê todas as abas desta planilha comercial e adiciona ao array geral
-                            data.SheetNames.forEach(sheetName => {
-                                state.comerciaisDataSheets.push(XLSX.utils.sheet_to_json(data.Sheets[sheetName], { header: 1 }));
-                            });
-                            document.getElementById('file2-status').innerHTML = `<i data-lucide="check-circle" class="icon-sm text-green"></i> Comerciais: <span class="text-green">${state.comerciaisFilesCount} Ficheiro(s)</span>`;
-                        }
-                    } catch (error) {
-                        console.error("Erro ao ler ficheiro:", error);
-                        alert("Erro ao ler o ficheiro " + file.name + ". Verifique se é um Excel válido.");
-                    }
+                        const wb = await readExcel(file);
+                        wb.SheetNames.forEach(sheetName => {
+                            const lowerName = sheetName.toLowerCase();
+                            const data = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1 });
+                            
+                            if (lowerName.includes('follow up') || lowerName.includes('follow-up')) state.extractedSheets.followUp = data;
+                            else if (lowerName.includes('saturação') || lowerName.includes('saturacao')) state.extractedSheets.saturacao = data;
+                            else if (lowerName.includes('bordomaquina') || lowerName.includes('bordo')) state.extractedSheets.bordomaquina = data;
+                            else if (lowerName.includes('comerciai') || lowerName.includes('poprog')) state.extractedSheets.comerciais.push(data);
+                            else if (lowerName.includes('prpo')) state.extractedSheets.prpo = data;
+                        });
+                    } catch (error) { console.error("Erro no arquivo:", file.name, error); }
                 }
+                
+                document.getElementById('badge-system').innerHTML = `<i data-lucide="check-circle" class="icon-sm text-green"></i> BD: <span class="text-green">Integrado</span>`;
                 lucide.createIcons();
-                checkAndProcessData();
+                document.getElementById('upload-feedback').textContent = "Cruzando dados...";
+                setTimeout(() => {
+                    processExtractedData();
+                    document.getElementById('drop-zone-overlay').classList.add('hidden');
+                    document.getElementById('dashboard-workspace').classList.remove('hidden');
+                }, 800);
             }
 
             function readExcel(file) {
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
-                    reader.onload = (e) => {
-                        try {
-                            const data = new Uint8Array(e.target.result);
-                            const workbook = XLSX.read(data, { type: 'array' });
-                            resolve(workbook);
-                        } catch (err) { reject(err); }
-                    };
-                    reader.onerror = reject;
-                    reader.readAsArrayBuffer(file);
+                    reader.onload = (e) => resolve(XLSX.read(new Uint8Array(e.target.result), { type: 'array' }));
+                    reader.onerror = reject; reader.readAsArrayBuffer(file);
                 });
             }
 
-            function checkAndProcessData() {
-                // Checa se tem o arquivo mestre (Construtivos) E se há pelo menos uma aba comercial lida
-                if (state.rawFile1Data && state.comerciaisDataSheets.length > 0) {
-                    uploadFeedback.textContent = "Dados carregados com sucesso! A construir o dashboard...";
-                    setTimeout(() => {
-                        processExtractedData();
-                        document.getElementById('drop-zone-overlay').classList.add('hidden');
-                        document.getElementById('dashboard-workspace').classList.remove('hidden');
-                    }, 500);
-                } else {
-                    uploadFeedback.textContent = "Envie a planilha de Construtivos e pelo menos uma de Comerciais para continuar.";
-                }
+            function excelToJSDate(serial) {
+                if(!serial) return null; if(typeof serial === 'string') return new Date(serial);
+                return new Date((Math.floor(serial - 25569)) * 86400 * 1000);
             }
+            function formatDate(date) { return (!date || isNaN(date)) ? '-' : new Date(date.getTime() + 86400000).toLocaleDateString('pt-BR'); }
+            function formatCur(val) { return (!val || isNaN(val)) ? 'R$ 0,00' : Number(val).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}); }
 
-            // --- Data Processing Logic ---
-            function excelDateToJSDate(serial) {
-                if(!serial) return null;
-                if(typeof serial === 'string') return new Date(serial);
-                const utc_days  = Math.floor(serial - 25569);
-                const utc_value = utc_days * 86400;                                        
-                const date_info = new Date(utc_value * 1000);
-                const fractional_day = serial - Math.floor(serial) + 0.0000001;
-                let total_seconds = Math.floor(86400 * fractional_day);
-                const seconds = total_seconds % 60;
-                total_seconds -= seconds;
-                const hours = Math.floor(total_seconds / (60 * 60));
-                const minutes = Math.floor(total_seconds / 60) % 60;
-                return new Date(date_info.getFullYear(), date_info.getMonth(), date_info.getDate(), hours, minutes, seconds);
-            }
-
-            function formatJSDate(date) {
-                if(!date || isNaN(date)) return '-';
-                return date.toLocaleDateString('pt-PT');
-            }
-
+            // --- PROCESSAMENTO CENTRALIZADO (ERP CORE) ---
             function processExtractedData() {
-                const transmissionsMap = new Map();
+                const trMap = new Map();
+                const supRiscoMap = new Map(); 
+                const pcpMap = new Map(); 
+                
+                state.uniqueClientes.clear();
+                state.uniqueWBS.clear();
                 state.uniqueLinhas.clear();
 
-                // 1. Processar Arquivo Mestre (Construtivos)
-                if(state.rawFile1Data) {
-                    for (let i = 1; i < state.rawFile1Data.length; i++) {
-                        const row = state.rawFile1Data[i];
-                        if (!row || row.length < 5) continue;
+                // 1. Mapear Risco de Fornecedor (Aba Saturação)
+                if(state.extractedSheets.saturacao.length) {
+                    state.extractedSheets.saturacao.forEach(r => {
+                        if(r.length < 5) return;
+                        supRiscoMap.set(String(r[0]).trim().toUpperCase(), {
+                            saturacaoPerc: parseFloat(r[2]) || 0,
+                            nota: r[4] || 'N/A'
+                        });
+                    });
+                }
+
+                // 2. Mapear PCP Bordo de Máquina (Aba Bordomaquina)
+                if(state.extractedSheets.bordomaquina.length) {
+                    state.extractedSheets.bordomaquina.forEach(r => {
+                        if(r.length < 15) return;
+                        const tr = String(r[1]).trim();
+                        if(tr) pcpMap.set(tr, {
+                            dataEntrega: excelToJSDate(r[3]),
+                            projEle: r[6] || '-', projPneu: r[7] || '-', projTop: r[8] || '-',
+                            matEle: r[9] || '0', matPneu: r[10] || '0', misc: r[11] || '-',
+                            placaAlum: r[12] || '-', etiQ: r[13] || '-', qrCode: r[14] || '-',
+                            testes: r[15] || '-', obsPcp: r[16] || ''
+                        });
+                    });
+                }
+
+                // 3. Mapear Construtivos (Follow Up) - Base
+                if(state.extractedSheets.followUp.length) {
+                    for (let i = 1; i < state.extractedSheets.followUp.length; i++) {
+                        const r = state.extractedSheets.followUp[i];
+                        if (!r || r.length < 5) continue;
                         
-                        const linhaOp = row[2] || 'Sem Linha';
-                        const descricao = row[3] || '';
-                        const transmissao = String(row[4] || '').trim();
+                        const cliente = String(r[0] || '').trim();
+                        const wbs = String(r[1] || '').trim();
+                        const linha = String(r[2] || '').trim();
+                        const desc = String(r[3] || '').trim();
+                        const tr = String(r[4] || '').trim();
+                        
+                        if (!tr || tr.toLowerCase().includes('transmissão')) continue; 
+                        
+                        if (cliente) state.uniqueClientes.add(cliente);
+                        if (wbs) state.uniqueWBS.add(wbs);
+                        if (linha) state.uniqueLinhas.add(linha);
 
-                        if (!transmissao || transmissao.toLowerCase().includes('transmissão')) continue; 
+                        const fornecedorName = String(r[11] || '').trim().toUpperCase();
+                        const pcpData = pcpMap.get(tr) || null;
+                        const riscoData = supRiscoMap.get(fornecedorName) || { saturacaoPerc: 0, nota: 'N/A' };
+                        const prioridadeRaw = r[23] !== undefined && r[23] !== '' ? String(r[23]).trim() : '';
 
-                        state.uniqueLinhas.add(linhaOp);
-
-                        transmissionsMap.set(transmissao, {
-                            id: transmissao,
-                            linhaOp: linhaOp,
-                            descricao: descricao,
+                        trMap.set(tr, {
+                            id: tr, cliente: cliente || 'S/ Cliente', linhaOp: linha || 'S/ Linha', descricao: desc, projetoWBS: wbs || 'S/ WBS',
                             construtivo: {
-                                inicio: excelDateToJSDate(row[9]),
-                                entregaFornecedor: excelDateToJSDate(row[12]),
-                                reprogramacao: excelDateToJSDate(row[13]),
-                                entregaFinal: excelDateToJSDate(row[14]),
-                                statusGeral: String(row[15] || '').trim()
+                                rev: r[5] || '-', makeBuy: r[8] || '-', fornecedor: fornecedorName,
+                                inicio: excelToJSDate(r[9]), entregaForn: excelToJSDate(r[12]),
+                                reprog: excelToJSDate(r[14]), entregaMfg: excelToJSDate(r[13]),
+                                statusSys: String(r[15] || '').trim(), valorTot: r[16] || 0,
+                                horasPlanejadas: r[17] || 0, respFollow: r[18] || '-',
+                                nf: r[19] || '-', comercialResp: r[20] || '-', status: r[21] || '-',
+                                localEnt: r[22] || '-', prioridade: prioridadeRaw, obs: r[7] || ''
                             },
-                            comerciais: []
+                            riscoFornecedor: riscoData, pcp: pcpData, comerciais: [], logisticaAdvanced: {}
                         });
                     }
                 }
 
-                // 2. Lógica para extrair as peças das planilhas Comerciais
-                const processComerciaisSheet = (sheetData) => {
-                    if(!sheetData) return;
-                    for (let i = 1; i < sheetData.length; i++) {
-                        const row = sheetData[i];
-                        if (!row || row.length < 2) continue;
+                // 4. Mapear Comerciais & PRPO
+                const processCom = (sheet) => {
+                    for (let i = 1; i < sheet.length; i++) {
+                        const r = sheet[i]; if (!r || r.length < 2) continue;
+                        const tr = String(r[0] || '').trim();
+                        if (!tr || tr.toLowerCase().includes('transmissão')) continue;
 
-                        const transmissao = String(row[0] || '').trim();
-                        if (!transmissao || transmissao.toLowerCase().includes('transmissão')) continue;
-
-                        const descPN = `${row[1] || ''} - ${row[2] || ''}`;
-                        const qtd = row[4] || 0;
-                        const requisicao = String(row[5] || '').trim(); 
-                        const oc = String(row[9] || '').trim(); 
-                        const dataEntrega = excelDateToJSDate(row[12]);
-
-                        let transObj = transmissionsMap.get(transmissao);
-                        if (!transObj) {
-                            transObj = {
-                                id: transmissao,
-                                linhaOp: 'Desconhecida',
-                                descricao: 'Somente Comercial',
-                                construtivo: null,
-                                comerciais: []
-                            };
-                            transmissionsMap.set(transmissao, transObj);
+                        let obj = trMap.get(tr);
+                        if (!obj) {
+                            obj = { id: tr, cliente: 'N/A', linhaOp: 'N/A', projetoWBS: 'N/A', descricao: 'Apenas Com.', construtivo: null, pcp: pcpMap.get(tr)||null, comerciais: [], logisticaAdvanced: {} };
+                            trMap.set(tr, obj);
                         }
 
-                        transObj.comerciais.push({
-                            descricao: descPN,
-                            quantidade: qtd,
-                            requisicao: requisicao,
-                            oc: oc,
-                            dataEntrega: dataEntrega
+                        const rc = String(r[5] || '').trim(); const oc = String(r[9] || '').trim();
+                        
+                        if(r[21] && String(r[21]).includes('FOB')) obj.logisticaAdvanced.frete = r[21]; 
+                        if(r[19] && String(r[19]).includes('BRBC')) obj.logisticaAdvanced.cc = r[19]; 
+                        if(r[25]) obj.logisticaAdvanced.presencaCarga = excelToJSDate(r[25]);
+
+                        obj.comerciais.push({
+                            desc: r[1] || '', pn: r[2] || '-', qtd: r[4] || 0,
+                            rc: rc, oc: oc, forn: r[11] || '',
+                            dtEnt: excelToJSDate(r[12]), nf: r[13] || '', pull: r[14] || ''
                         });
                     }
                 };
+                state.extractedSheets.comerciais.forEach(processCom);
+                if(state.extractedSheets.prpo.length) processCom(state.extractedSheets.prpo);
 
-                // Executa a função acima para TODAS as abas/arquivos de comerciais carregados
-                state.comerciaisDataSheets.forEach(sheet => processComerciaisSheet(sheet));
-
-                // 3. Determinar status dos 6 estágios para cada Card
+                // 5. Calculo de Status E2E
                 const today = new Date();
-                state.processedData = Array.from(transmissionsMap.values()).map(card => {
-                    
-                    let hasDelayedCommercial = false;
-                    let hasMissingReq = false;
-                    let hasMissingOC = false;
-                    let allComerciaisComplete = card.comerciais.length > 0;
+                state.processedData = Array.from(trMap.values()).map(card => {
+                    let reqOk = true, ocOk = true, hasComerciais = card.comerciais.length > 0;
+                    let comAtrasado = false;
                     
                     card.comerciais.forEach(c => {
-                        if (!c.requisicao || c.requisicao === '') hasMissingReq = true;
-                        if (c.requisicao && !c.oc) hasMissingOC = true;
-                        if (!c.oc) allComerciaisComplete = false;
-
-                        if (c.dataEntrega && c.dataEntrega < today && !c.oc) {
-                            hasDelayedCommercial = true;
-                        }
+                        if (!c.rc) reqOk = false;
+                        if (!c.oc) ocOk = false;
+                        if (c.dtEnt && c.dtEnt < today && !c.oc) comAtrasado = true;
                     });
 
-                    let purchasingStatus = 'Complete';
-                    if (card.comerciais.length === 0) purchasingStatus = 'Complete'; 
-                    else if (hasMissingReq) purchasingStatus = 'On delayed'; 
-                    else if (hasMissingOC) purchasingStatus = 'Ongoing'; 
+                    let pStatus = hasComerciais ? (!reqOk ? 'Vazio' : (!ocOk ? 'Ongoing' : 'Complete')) : 'Vazio';
+                    let cStatus = hasComerciais ? (comAtrasado ? 'On delayed' : (ocOk ? 'Complete' : 'Ongoing')) : 'Vazio';
                     
-                    let commercialStatus = 'Complete';
-                    if (card.comerciais.length > 0) {
-                        if (hasDelayedCommercial) commercialStatus = 'On delayed';
-                        else if (!allComerciaisComplete) commercialStatus = 'Ongoing';
-                    }
-
-                    let constructivesStatus = 'Complete';
+                    let constStatus = 'Vazio';
                     if (card.construtivo) {
-                        const st = card.construtivo.statusGeral.toLowerCase();
-                        if (st.includes('atrasa') || (card.construtivo.reprogramacao && card.construtivo.reprogramacao < today)) {
-                            constructivesStatus = 'On delayed';
-                        } else if (st === '1' || st === '100%' || st.includes('conclu')) {
-                            constructivesStatus = 'Complete';
-                        } else {
-                            constructivesStatus = 'Ongoing';
-                        }
+                        const st = card.construtivo.statusSys.toLowerCase();
+                        if (st.includes('atrasa') || (card.construtivo.reprog && card.construtivo.reprog < today)) constStatus = 'On delayed';
+                        else if (st === '1' || st === '100%' || st.includes('conclu')) constStatus = 'Complete';
+                        else constStatus = 'Ongoing';
                     }
-
-                    let engineeringStatus = 'Complete'; 
-                    let manufacturingStatus = constructivesStatus === 'Complete' ? 'Ongoing' : 'Ongoing';
-                    if(constructivesStatus === 'Complete' && commercialStatus === 'Complete') manufacturingStatus = 'Complete';
                     
-                    let deliveryStatus = 'Ongoing';
-                    if (manufacturingStatus === 'Complete') deliveryStatus = 'Complete';
+                    let engStatus = card.pcp ? (card.pcp.projEle.toLowerCase().includes('liberad') ? 'Complete' : 'Ongoing') : (card.construtivo ? 'Complete' : 'Vazio'); 
+                    let mfgStatus = card.pcp ? (card.pcp.testes.toLowerCase().includes('ok') ? 'Complete' : 'Ongoing') : ((constStatus !== 'Vazio' || cStatus !== 'Vazio') ? 'Ongoing' : 'Vazio');
+                    let delStatus = mfgStatus !== 'Vazio' ? (mfgStatus === 'Complete' ? 'Complete' : 'Ongoing') : 'Vazio';
 
-                    const stages = [engineeringStatus, purchasingStatus, commercialStatus, constructivesStatus, manufacturingStatus, deliveryStatus];
-                    let overallStatus = 'Ongoing';
-                    if (stages.every(s => s === 'Complete')) overallStatus = 'Complete';
-                    else if (stages.some(s => s === 'On delayed')) overallStatus = 'On delayed';
+                    const stages = [engStatus, pStatus, cStatus, constStatus, mfgStatus, delStatus];
+                    let overall = 'Ongoing';
+                    if (stages.every(s => s === 'Complete' || s === 'Vazio')) overall = 'Complete';
+                    if (stages.some(s => s === 'On delayed')) overall = 'On delayed';
 
-                    return {
-                        ...card,
-                        stages: {
-                            Engineering: engineeringStatus,
-                            Purchasing: purchasingStatus,
-                            Commercial: commercialStatus,
-                            Constructives: constructivesStatus,
-                            Manufacturing: manufacturingStatus,
-                            Delivery: deliveryStatus
-                        },
-                        overallStatus: overallStatus
-                    };
+                    return { ...card, stages: { Engineering: engStatus, Purchasing: pStatus, Commercial: cStatus, Constructives: constStatus, Manufacturing: mfgStatus, Delivery: delStatus }, overallStatus: overall };
                 });
 
-                populateFilters();
-                renderDashboard();
+                populateDropdowns();
+                renderGrid();
             }
 
-            // --- UI Rendering ---
-            function populateFilters() {
-                const linhaSelect = document.getElementById('filter-linha');
-                linhaSelect.innerHTML = '<option value="">Todas as Linhas / OP</option>';
-                const sortedLinhas = Array.from(state.uniqueLinhas).sort();
-                sortedLinhas.forEach(linha => {
-                    if(linha) {
-                        const opt = document.createElement('option');
-                        opt.value = linha;
-                        opt.textContent = linha;
-                        linhaSelect.appendChild(opt);
-                    }
-                });
+            // --- POPULAR DROPDOWNS ---
+            function populateDropdowns() {
+                const clienteSel = document.getElementById('filter-cliente');
+                clienteSel.innerHTML = '<option value="">Todos os Clientes</option>';
+                Array.from(state.uniqueClientes).sort().forEach(c => { if(c) clienteSel.appendChild(new Option(c, c)); });
+
+                const wbsSel = document.getElementById('filter-wbs');
+                wbsSel.innerHTML = '<option value="">Todos os Projetos WBS</option>';
+                Array.from(state.uniqueWBS).sort().forEach(w => { if(w) wbsSel.appendChild(new Option(w, w)); });
+
+                const linhaSel = document.getElementById('filter-linha');
+                linhaSel.innerHTML = '<option value="">Todas as Linhas / OP</option>';
+                Array.from(state.uniqueLinhas).sort().forEach(l => { if(l) linhaSel.appendChild(new Option(l, l)); });
             }
 
-            let filterTransmissaoTimeout;
-            document.getElementById('filter-transmissao').addEventListener('input', (e) => {
-                clearTimeout(filterTransmissaoTimeout);
-                const value = e.target.value.toLowerCase();
-                filterTransmissaoTimeout = setTimeout(() => {
-                    state.filters.transmissao = value;
-                    renderDashboard();
-                }, 200);
-            });
-
-            document.getElementById('filter-linha').addEventListener('change', (e) => {
-                state.filters.linha = e.target.value;
-                renderDashboard();
-            });
-
-            // Filtro de status agora é feito clicando nos cards de estatística
-            document.querySelectorAll('.stat-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    const status = card.getAttribute('data-status') || 'all';
-                    state.filters.status = status;
-                    renderDashboard();
+            // --- LISTENERS DE FILTRO ---
+            document.getElementById('filter-transmissao').addEventListener('input', (e) => { state.filters.transmissao = e.target.value.toLowerCase(); renderGrid(); });
+            document.getElementById('filter-cliente').addEventListener('change', (e) => { state.filters.cliente = e.target.value; renderGrid(); });
+            document.getElementById('filter-wbs').addEventListener('change', (e) => { state.filters.wbs = e.target.value; renderGrid(); });
+            document.getElementById('filter-linha').addEventListener('change', (e) => { state.filters.linha = e.target.value; renderGrid(); });
+            
+            document.querySelectorAll('.stat-card').forEach(c => {
+                c.addEventListener('click', () => {
+                    state.filters.status = c.getAttribute('data-status') || 'all';
+                    document.querySelectorAll('.stat-card').forEach(x => x.classList.remove('selected'));
+                    c.classList.add('selected'); renderGrid();
                 });
             });
 
-            function renderDashboard() {
+            // --- UI LOGIC ---
+            function getTheme(st) {
+                switch(st) {
+                    case 'Complete': return { b: 'border-complete', bg: 'bg-complete', i: 'check-circle-2', t: 'Concluído', c: 'complete' };
+                    case 'On delayed': return { b: 'border-delayed', bg: 'bg-delayed', i: 'alert-circle', t: 'Atraso/Risco', c: 'delayed' };
+                    case 'Ongoing': return { b: 'border-ongoing', bg: 'bg-ongoing', i: 'clock', t: 'Em Andamento', c: 'ongoing' };
+                    default: return { b: '', bg: '', i: 'minus', t: 'N/A', c: 'empty' };
+                }
+            }
+
+            function renderGrid() {
                 const container = document.getElementById('cards-container');
-                const emptyState = document.getElementById('empty-state');
                 container.innerHTML = '';
+                
+                // Funil Inteligente: Testa todas as condições juntas
+                const filtered = state.processedData.filter(c => 
+                    (c.id.toLowerCase().includes(state.filters.transmissao) || c.descricao.toLowerCase().includes(state.filters.transmissao)) &&
+                    (state.filters.cliente === '' || c.cliente === state.filters.cliente) &&
+                    (state.filters.wbs === '' || c.projetoWBS === state.filters.wbs) &&
+                    (state.filters.linha === '' || c.linhaOp === state.filters.linha) &&
+                    (state.filters.status === 'all' || c.overallStatus === state.filters.status)
+                );
 
-                // 1. FILTRO BASE: Pesquisa de texto e Linha (Ignora o botão de Status clicado)
-                const baseFilteredData = state.processedData.filter(card => {
-                    const matchBusca = card.id.toLowerCase().includes(state.filters.transmissao) || card.descricao.toLowerCase().includes(state.filters.transmissao);
-                    const matchLinha = state.filters.linha === '' || card.linhaOp === state.filters.linha;
-                    return matchBusca && matchLinha;
-                });
+                document.getElementById('stat-total').textContent = state.processedData.length;
+                document.getElementById('stat-ongoing').textContent = state.processedData.filter(c => c.overallStatus === 'Ongoing').length;
+                document.getElementById('stat-delayed').textContent = state.processedData.filter(c => c.overallStatus === 'On delayed').length;
+                document.getElementById('stat-complete').textContent = state.processedData.filter(c => c.overallStatus === 'Complete').length;
 
-                // 2. FILTRO DA LISTA: Pega o BaseFilteredData e aplica o botão de Status clicado (para os cartões apenas)
-                const listFilteredData = baseFilteredData.filter(card => {
-                    return state.filters.status === 'all' || card.overallStatus === state.filters.status;
-                });
+                if (filtered.length === 0) document.getElementById('empty-state').classList.remove('hidden');
+                else {
+                    document.getElementById('empty-state').classList.add('hidden');
+                    filtered.forEach(card => {
+                        const el = document.createElement('div');
+                        const t = getTheme(card.overallStatus);
+                        el.className = `card ${t.b}`;
+                        
+                        const stagesMap = [{k:'Engineering',l:'ENG'},{k:'Purchasing',l:'PUR'},{k:'Commercial',l:'COM'},{k:'Constructives',l:'MFG Ext'},{k:'Manufacturing',l:'MFG Int'},{k:'Delivery',l:'DEL'}];
+                        const sHtml = stagesMap.map(s => {
+                            const st = getTheme(card.stages[s.k]);
+                            return `<div class="stage-box ${st.bg}"><span class="stage-title">${s.l}</span><div class="stage-status"><i data-lucide="${st.i}" class="icon-inline"></i> ${st.t === 'N/A'?'-':st.t.substring(0,4)+'.'}</div></div>`;
+                        }).join('');
 
-                // --- TOTAL DE TRANSMISSÕES GLOBAL (NÃO MUDA COM FILTROS) ---
-                const allData = state.processedData;
-                document.getElementById('stat-total').textContent = allData.length;
-                document.getElementById('stat-ongoing').textContent = allData.filter(c => c.overallStatus === 'Ongoing').length;
-                document.getElementById('stat-delayed').textContent = allData.filter(c => c.overallStatus === 'On delayed').length;
-                document.getElementById('stat-complete').textContent = allData.filter(c => c.overallStatus === 'Complete').length;
-
-                if (listFilteredData.length === 0) {
-                    emptyState.classList.remove('hidden');
-                } else {
-                    emptyState.classList.add('hidden');
-                    listFilteredData.forEach(card => {
-                        container.appendChild(createCardElement(card));
+                        el.innerHTML = `
+                            <div class="card-header">
+                                <div><span class="card-tag" title="Cliente | Linha">${card.cliente} | ${card.linhaOp}</span><h3 class="card-title">${card.id}</h3></div>
+                                <div class="card-status-badge ${t.bg}"><i data-lucide="${t.i}" class="icon-inline" style="margin:0;"></i></div>
+                            </div>
+                            <p class="card-desc" title="${card.descricao}">${card.descricao || '-'}</p>
+                            <div class="card-stages">${sHtml}</div>
+                            ${card.construtivo ? `<div class="card-footer"><div class="card-footer-item"><i data-lucide="factory" class="icon-inline"></i> <span>${card.construtivo.fornecedor.substring(0,15)}</span></div><div class="card-footer-item"><i data-lucide="flag" class="icon-inline"></i> <span>${formatDate(card.construtivo.entregaMfg)}</span></div></div>` : ''}
+                            <button class="view-details-btn"><i data-lucide="scan-search" class="icon-sm"></i> Detalhamento E2E</button>
+                        `;
+                        el.addEventListener('click', () => openModal(card));
+                        container.appendChild(el);
                     });
                 }
-
-                // Atualiza ícones Lucide apenas uma vez após renderizar todos os cards
                 lucide.createIcons({ root: container });
             }
 
-            function getStatusColorClass(status, type = 'border') {
-                switch(status) {
-                    case 'Complete': return type === 'border' ? 'border-complete' : 'bg-complete';
-                    case 'On delayed': return type === 'border' ? 'border-delayed' : 'bg-delayed';
-                    case 'Ongoing': return type === 'border' ? 'border-ongoing' : 'bg-ongoing';
-                    default: return '';
+            // --- MODAL POPULATE ---
+            const iconM = {'Engineering':'pen-tool','Purchasing':'shopping-cart','Commercial':'dollar-sign','Constructives':'wrench','Manufacturing':'factory','Delivery':'truck'};
+            
+            function openModal(card) {
+                document.getElementById('modal-title').textContent = card.id;
+                document.getElementById('modal-linha').textContent = `${card.cliente} | ${card.linhaOp}`;
+                document.getElementById('modal-desc').textContent = card.descricao;
+
+                let prioTag = '';
+                if (card.construtivo && card.construtivo.prioridade) {
+                    prioTag = `<span class="badge-outline priority-high"><i data-lucide="alert-triangle" class="icon-sm"></i> Prioridade: ${card.construtivo.prioridade}</span>`;
                 }
-            }
 
-            function createCardElement(card) {
-                const el = document.createElement('div');
-                el.className = `card ${getStatusColorClass(card.overallStatus, 'border')}`;
-                
-                const stagesHtml = ['Engineering', 'Purchasing', 'Commercial', 'Constructives', 'Manufacturing', 'Delivery'].map(stage => {
-                    const status = card.stages[stage];
-                    const colorClasses = getStatusColorClass(status, 'badge');
-                    let icon = '';
-                    if(status === 'Complete') icon = '<i data-lucide="check-circle-2" class="icon-inline"></i>';
-                    else if(status === 'On delayed') icon = '<i data-lucide="alert-circle" class="icon-inline"></i>';
-                    else icon = '<i data-lucide="clock" class="icon-inline"></i>';
+                document.getElementById('modal-extra-tags').innerHTML = `
+                    <span class="badge-outline"><i data-lucide="folder" class="icon-sm"></i> ${card.projetoWBS}</span>
+                    <span class="badge-outline"><i data-lucide="tag" class="icon-sm"></i> Rev: ${card.construtivo ? card.construtivo.rev : '-'}</span>
+                    <span class="badge-outline"><i data-lucide="layers" class="icon-sm"></i> ${card.construtivo ? card.construtivo.makeBuy : 'N/A'}</span>
+                    ${prioTag}
+                `;
 
-                    return `
-                        <div class="stage-box ${colorClasses}">
-                            <span class="stage-title">${stage}</span>
-                            <div class="stage-status">${icon} ${status}</div>
-                        </div>
-                    `;
+                const oT = getTheme(card.overallStatus);
+                const bC = document.getElementById('modal-overall-status');
+                bC.className = `card-status-badge ${oT.bg}`; bC.innerHTML = `<i data-lucide="${oT.icon}" class="icon-sm"></i> Status Global: ${oT.t}`;
+
+                document.getElementById('modal-stepper').innerHTML = Object.keys(card.stages).map(k => {
+                    const st = getTheme(card.stages[k]);
+                    return `<div class="step ${st.c}"><div class="step-icon-wrapper" title="${st.t}"><i data-lucide="${iconM[k]||'circle'}" class="icon-md"></i></div><div class="step-label">${k}</div></div>`;
                 }).join('');
 
-                let extraInfo = '';
-                if (card.construtivo) {
-                    extraInfo = `
-                        <div class="card-footer">
-                            <div class="card-footer-item" title="Início Construtivo">
-                                <i data-lucide="calendar" class="icon-inline"></i> Início: <span>${formatJSDate(card.construtivo.inicio)}</span>
-                            </div>
-                            <div class="card-footer-item" title="Entrega Final">
-                                <i data-lucide="flag" class="icon-inline"></i> Fim: <span>${formatJSDate(card.construtivo.entregaFinal)}</span>
-                            </div>
+                // COL 1: Engenharia
+                let engH = '<p class="text-slate text-sm">Sem dados de PCP/Engenharia.</p>';
+                if(card.pcp || card.construtivo) {
+                    engH = `
+                        <div class="info-row"><span class="info-label">Estratégia:</span><span class="info-val">${card.construtivo?.makeBuy || '-'}</span></div>
+                        <div class="info-row"><span class="info-label">Revisão:</span><span class="info-val">${card.construtivo?.rev || '-'}</span></div>
+                        <div class="info-row"><span class="info-label">Proj. Elétrico:</span><span class="info-val badge-status">${card.pcp?.projEle || 'Não Mapeado'}</span></div>
+                        <div class="info-row"><span class="info-label">Proj. Pneumático:</span><span class="info-val badge-status">${card.pcp?.projPneu || 'Não Mapeado'}</span></div>
+                        <div class="info-row"><span class="info-label">Proj. Topográfico:</span><span class="info-val badge-status">${card.pcp?.projTop || 'Não Mapeado'}</span></div>
+                        <div class="info-row"><span class="info-label">Horas Estimadas:</span><span class="info-val">${card.construtivo?.horasPlanejadas || '0'} h</span></div>
+                    `;
+                }
+                document.getElementById('modal-eng-data').innerHTML = engH;
+
+                // COL 2: Construtivo
+                let conH = '<p class="text-slate text-sm">Sem dados de fornecimento externo.</p>';
+                if(card.construtivo) {
+                    const rPerc = card.riscoFornecedor.saturacaoPerc * 100;
+                    const satClass = rPerc > 80 ? 'badge-sat-red' : (rPerc > 50 ? 'badge-sat-yellow' : 'badge-sat-green');
+                    
+                    conH = `
+                        <div class="info-row"><span class="info-label">Fornecedor:</span><span class="info-val">${card.construtivo.fornecedor}</span></div>
+                        <div class="info-row"><span class="info-label">Risco / Saturação:</span><span class="info-val badge-status ${satClass}">${rPerc.toFixed(1)}% | Nota: ${card.riscoFornecedor.nota}</span></div>
+                        <div class="info-row"><span class="info-label">Resp. Follow-Up:</span><span class="info-val">${card.construtivo.respFollow}</span></div>
+                        <div class="info-row"><span class="info-label">Início / Entrega Orig.:</span><span class="info-val">${formatDate(card.construtivo.inicio)} <br/> ${formatDate(card.construtivo.entregaForn)}</span></div>
+                        <div class="info-row"><span class="info-label text-red">Reprogramação:</span><span class="info-val text-red">${formatDate(card.construtivo.reprog)}</span></div>
+                        <div style="margin-top:0.75rem; padding:0.5rem; background:#f8fafc; border:1px dashed #cbd5e1; border-radius:0.5rem; font-size:0.75rem;">
+                            <strong>Obs. Histórico:</strong> <span class="text-slate">${card.construtivo.obs || 'S/ observações.'}</span>
                         </div>
                     `;
                 }
+                document.getElementById('modal-construtivo-data').innerHTML = conH;
 
-                el.innerHTML = `
-                    <div class="card-header">
-                        <div>
-                            <span class="card-tag">${card.linhaOp}</span>
-                            <h3 class="card-title">${card.id}</h3>
-                        </div>
-                    </div>
-                    <p class="card-desc" title="${card.descricao}">${card.descricao || 'Sem descrição'}</p>
-                    
-                    <div class="card-stages">
-                        ${stagesHtml}
-                    </div>
-                    
-                    ${extraInfo}
-                `;
-                return el;
+                // COL 3: PCP
+                let pcpH = '<p class="text-slate text-sm">Transmissão não listada no Bordo de Máquina.</p>';
+                if(card.pcp) {
+                    pcpH = `
+                        <div class="info-row"><span class="info-label">Local Montagem:</span><span class="info-val text-indigo">${card.construtivo?.localEnt || '-'}</span></div>
+                        <div class="info-row"><span class="info-label">Mat. Elétrico / Pneu:</span><span class="info-val">${(parseFloat(card.pcp.matEle)*100).toFixed(0)}% / ${(parseFloat(card.pcp.matPneu)*100).toFixed(0)}%</span></div>
+                        <div class="info-row"><span class="info-label">Miscelâneas / Placa:</span><span class="info-val">${card.pcp.misc} / ${card.pcp.placaAlum}</span></div>
+                        <div class="info-row"><span class="info-label">Etiquetas / QR Code:</span><span class="info-val">${card.pcp.etiQ} / ${card.pcp.qrCode}</span></div>
+                        <div class="info-row"><span class="info-label font-bold text-orange">Status Testes:</span><span class="info-val font-bold text-orange">${card.pcp.testes}</span></div>
+                    `;
+                } else if (card.construtivo) {
+                     pcpH = `<div class="info-row"><span class="info-label">Local Montagem:</span><span class="info-val text-indigo">${card.construtivo?.localEnt || '-'}</span></div><p class="text-slate text-xs mt-2">Aguardando entrada física no PCP.</p>`;
+                }
+                document.getElementById('modal-pcp-data').innerHTML = pcpH;
+
+                // COL 4: Finanças
+                let finH = '<p class="text-slate text-sm">Sem info. financeira/PRPO.</p>';
+                if(card.construtivo || card.logisticaAdvanced.cc) {
+                    finH = `
+                        <div class="info-row"><span class="info-label">Comprador:</span><span class="info-val">${card.construtivo?.comercialResp || '-'}</span></div>
+                        <div class="info-row"><span class="info-label">Centro Custo (WBS):</span><span class="info-val">${card.logisticaAdvanced.cc || card.projetoWBS}</span></div>
+                        <div class="info-row"><span class="info-label">Valor Total Ordem:</span><span class="info-val font-bold text-green">${formatCur(card.construtivo?.valorTot)}</span></div>
+                        <div class="info-row"><span class="info-label">NF Construtivo:</span><span class="info-val">${card.construtivo?.nf || '-'}</span></div>
+                        <div class="info-row"><span class="info-label">Frete (Incoterm):</span><span class="info-val">${card.logisticaAdvanced.frete || 'FOB'}</span></div>
+                        <div class="info-row"><span class="info-label">Data Presença Carga:</span><span class="info-val text-blue">${formatDate(card.logisticaAdvanced.presencaCarga)}</span></div>
+                    `;
+                }
+                document.getElementById('modal-fin-data').innerHTML = finH;
+
+                // FULL ROW: Comerciais
+                let comH = '<p class="text-slate text-sm">Nenhum item BOM associado.</p>';
+                if(card.comerciais.length) {
+                    comH = card.comerciais.map(c => `
+                        <div class="item-row">
+                            <div class="item-title">${c.desc}</div>
+                            <div class="item-meta">
+                                <span style="background:#f1f5f9;border:none;font-weight:600;"><i data-lucide="tag" class="icon-inline"></i> ${c.pn}</span>
+                                <span><i data-lucide="hash" class="icon-inline"></i> Qtd: ${c.qtd}</span>
+                                <span><i data-lucide="file-text" class="icon-inline"></i> RC: ${c.rc || 'Pend.'}</span>
+                                <span class="${!c.oc?'text-red':'text-green'}"><i data-lucide="file-check-2" class="icon-inline"></i> OC: ${c.oc || 'Pend.'}</span>
+                                ${c.nf ? `<span class="text-green"><i data-lucide="receipt" class="icon-inline"></i> NF: ${c.nf}</span>` : ''}
+                                ${c.pull ? `<span class="text-indigo"><i data-lucide="map-pin" class="icon-inline"></i> PULL: ${c.pull}</span>` : ''}
+                            </div>
+                        </div>`).join('');
+                }
+                document.getElementById('modal-comerciais-list').innerHTML = comH;
+
+                lucide.createIcons({ root: modalOverlay });
+                modalOverlay.classList.add('active');
             }
 
+            // --- DEMO DATA ---
             function loadDemoData() {
-                uploadFeedback.textContent = "A carregar dados de exemplo...";
+                document.getElementById('upload-feedback').textContent = "Carregando ambiente de teste ERP...";
                 
+                state.uniqueClientes = new Set(['VW', 'RENAULT', 'PSA']);
+                state.uniqueWBS = new Set(['BRBCBBB35', 'BRBCBBB37']);
                 state.uniqueLinhas = new Set(['AUFBAU', 'BODYSIDE', 'STW']);
                 
-                state.processedData = [
-                    {
-                        id: 'VW427-PATAGONIA-AUFBAU-0035-2025',
-                        linhaOp: 'AUFBAU',
-                        descricao: 'DISPOSITIVO INDEX. UNDERBODY',
-                        overallStatus: 'Complete',
-                        stages: { Engineering: 'Complete', Purchasing: 'Complete', Commercial: 'Complete', Constructives: 'Complete', Manufacturing: 'Complete', Delivery: 'Complete' },
-                        construtivo: { inicio: new Date(), entregaFinal: new Date(new Date().setDate(new Date().getDate() + 10)) }
-                    },
-                    {
-                        id: 'VW247-PATAGONIA-BODYSIDE-0001-2025',
-                        linhaOp: 'BODYSIDE',
-                        descricao: 'GRAMPO PNEUMATICO V2 63.1',
-                        overallStatus: 'On delayed',
-                        stages: { Engineering: 'Complete', Purchasing: 'On delayed', Commercial: 'Ongoing', Constructives: 'Complete', Manufacturing: 'Ongoing', Delivery: 'Ongoing' },
-                        construtivo: { inicio: new Date(), entregaFinal: new Date() }
-                    },
-                    {
-                        id: 'VW427-PATAGONIA-AUFBAU-0041-2025',
-                        linhaOp: 'AUFBAU',
-                        descricao: 'GUIA TELESCOPICA',
-                        overallStatus: 'Ongoing',
-                        stages: { Engineering: 'Complete', Purchasing: 'Complete', Commercial: 'Ongoing', Constructives: 'Ongoing', Manufacturing: 'Ongoing', Delivery: 'Ongoing' },
-                        construtivo: { inicio: new Date(), entregaFinal: new Date(new Date().setDate(new Date().getDate() + 30)) }
-                    },
-                    {
-                        id: 'BB37-VW-ANCH-STW-UB2-0002-2025',
-                        linhaOp: 'STW',
-                        descricao: 'SUPORTE MALA',
-                        overallStatus: 'On delayed',
-                        stages: { Engineering: 'Complete', Purchasing: 'Complete', Commercial: 'Complete', Constructives: 'On delayed', Manufacturing: 'Ongoing', Delivery: 'Ongoing' },
-                        construtivo: { inicio: new Date(), entregaFinal: new Date(new Date().setDate(new Date().getDate() - 5)) }
-                    },
-                    {
-                        id: 'VW427-PATAGONIA-AUFBAU-0003-2025',
-                        linhaOp: 'AUFBAU',
-                        descricao: 'GUIA LINEAR SHS20',
-                        overallStatus: 'Ongoing',
-                        stages: { Engineering: 'Complete', Purchasing: 'Ongoing', Commercial: 'Complete', Constructives: 'Ongoing', Manufacturing: 'Ongoing', Delivery: 'Ongoing' },
-                        construtivo: null
-                    }
+                state.extractedSheets.saturacao = [
+                    ["Fornecedor", "", "Saturação %", "", "Nota Avaliação"],
+                    ["MEC SYSTEMS", "", "0.85", "", "0.92"],
+                    ["AR SANTOS", "", "0.95", "", "0.81"],
+                    ["IMECOR", "", "0.45", "", "0.96"]
+                ];
+                
+                state.extractedSheets.bordomaquina = [
+                    ["ID", "TRANSMISSÃO", "OPERAÇÃO", "DATA", "LOCAL", "PRIO", "PROJ ELE", "PROJ PNEU", "PROJ TOP", "MAT ELE", "MAT PNEU", "MISC", "PLACA", "ETIQ", "QR", "TESTES", "OBS"],
+                    [1, "VW427-PATAGONIA-AUFBAU-0035-2025", "OP10", 46000, "Betim", "N", "Liberado", "Liberado", "N/A", "1", "1", "Ok", "Fixada", "Colado", "Gerado", "Testes OK", "Sem Pendências"],
+                    [2, "VW247-PATAGONIA-BODYSIDE-0001-2025", "OP20", 46050, "Santo André", "S", "Em Análise", "Não liberado", "N/A", "0.2", "0", "Pendente", "-", "-", "-", "Pendente", "Aguardando Mat."]
+                ];
+
+                state.extractedSheets.followUp = [
+                    [], 
+                    ["VW","BRBCBBB35","AUFBAU","DISPOSITIVO INDEX","VW427-PATAGONIA-AUFBAU-0035-2025","1","Date","Aprovado GQ","Make","45500","OC","MEC SYSTEMS","45600","45605","45610","100% Concluído","15000","120","Ana","123","Vic","Ok","Betim",""],
+                    ["VW","BRBCBBB35","BODYSIDE","GRAMPO PNEUMATICO","VW247-PATAGONIA-BODYSIDE-0001-2025","0","Date","Máquina CNC Quebrou","Buy","45550","OC","AR SANTOS","45620","45625","45640","Atrasado","8400","45","Rudnei","-","Jes","Fail","S.André","1"],
+                    ["RENAULT","BRBCBBB37","STW","SUPORTE BASE","BB37-VW-ANCH-STW-UB2-0002-2025","2","Date","Nenhuma obs.","Make/Buy","45550","OC","IMECOR","45620","45625","45640","Em andamento","1200","15","Kaio","-","Vic","Ok","S.André","MÁXIMA"]
+                ];
+
+                state.extractedSheets.comerciais = [
+                    [[], ["VW427-PATAGONIA-AUFBAU-0035-2025","SENSOR M12","PN123","D","4","RC1","x","x","x","OC1","x","FORN", "45600", "NF12", "PULL99"]],
+                    [[], ["VW247-PATAGONIA-BODYSIDE-0001-2025","CILINDRO 50MM","CIL50","D","2","RC2","x","x","x","","x","FORN", "45630", "", ""]]
+                ];
+
+                state.extractedSheets.prpo = [
+                    [[], ["VW427-PATAGONIA-AUFBAU-0035-2025","SENSOR M12","PN123","D","4","RC1","x","x","x","OC1","x","FORN", "45600", "NF12", "PULL99","","","","","BRBC-CC1","","CIF","","","","45590"]]
                 ];
 
                 setTimeout(() => {
-                    document.getElementById('file1-status').innerHTML = `<i data-lucide="check-circle" class="icon-sm text-green"></i> Construtivos: <span class="text-green">Demo</span>`;
-                    document.getElementById('file2-status').innerHTML = `<i data-lucide="check-circle" class="icon-sm text-green"></i> Comerciais: <span class="text-green">Demo</span>`;
-                    lucide.createIcons();
-                    
-                    populateFilters();
-                    renderDashboard();
+                    document.getElementById('badge-system').innerHTML = `<i data-lucide="check-circle" class="icon-sm text-green"></i> BD: <span class="text-green">Demo</span>`;
+                    processExtractedData();
                     document.getElementById('drop-zone-overlay').classList.add('hidden');
                     document.getElementById('dashboard-workspace').classList.remove('hidden');
                 }, 600);
