@@ -42,16 +42,25 @@
         /* === MAIN LAYOUT & UPLOAD === */
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         .overlay { position: absolute; inset: 0; background-color: #f9fafb; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; }
-        .drop-zone { background-color: white; border-radius: 0.75rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); padding: 2.5rem; text-align: center; border: 2px dashed #9ca3af; transition: all 0.3s ease; width: 100%; max-width: 48rem; }
+        .drop-zone { background-color: white; border-radius: 0.75rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); padding: 2.5rem; text-align: center; border: 2px dashed #9ca3af; transition: all 0.3s ease; width: 100%; max-width: 48rem; display: flex; flex-direction: column; align-items: center;}
         .drop-zone.dragover { border-color: #3b82f6; background-color: #eff6ff; }
         .drop-zone h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem; }
         .drop-zone p { color: #6b7280; margin-bottom: 1.5rem; line-height: 1.5; font-size: 0.9rem;}
-        .drop-zone span { font-weight: 600; color: #374151; }
-        .btn-group { display: flex; justify-content: center; gap: 1rem; margin-top: 1rem; }
-        .btn { cursor: pointer; padding: 0.5rem 1.5rem; border-radius: 0.5rem; font-weight: 500; font-size: 1rem; transition: background-color 0.2s; border: none; display: inline-flex; align-items: center; gap: 0.5rem; }
+        
+        /* New Styles for File Queue */
+        .file-queue { width: 100%; max-width: 32rem; margin-top: 1.5rem; margin-bottom: 1.5rem; text-align: left; background: #f8fafc; border-radius: 0.5rem; border: 1px solid #e2e8f0; padding: 1rem; max-height: 150px; overflow-y: auto;}
+        .file-queue-title { font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.05em;}
+        .file-queue-item { font-size: 0.85rem; color: #334155; display: flex; align-items: center; padding: 0.25rem 0; border-bottom: 1px dashed #cbd5e1;}
+        .file-queue-item:last-child { border-bottom: none; }
+        
+        .btn-group { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;}
+        .btn { cursor: pointer; padding: 0.5rem 1.5rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.9rem; transition: background-color 0.2s; border: none; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn-outline { background-color: white; border: 1px solid #cbd5e1; color: #475569; } .btn-outline:hover { background-color: #f1f5f9; }
         .btn-primary { background-color: #2563eb; color: white; } .btn-primary:hover { background-color: #1d4ed8; }
-        .btn-secondary { background-color: #e5e7eb; color: #1f2937; } .btn-secondary:hover { background-color: #d1d5db; }
-        .upload-feedback { margin-top: 1rem; font-size: 0.875rem; color: #2563eb; font-weight: 500; height: 1.5rem; }
+        .btn-success { background-color: #16a34a; color: white; } .btn-success:hover { background-color: #15803d; }
+        .btn-success:disabled { background-color: #86efac; cursor: not-allowed; }
+        
+        .upload-feedback { margin-top: 1rem; font-size: 0.875rem; color: #2563eb; font-weight: 600; height: 1.5rem; }
 
         /* === DASHBOARD === */
         .dashboard-workspace { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
@@ -110,7 +119,6 @@
         .badge-outline { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.2rem 0.5rem; border: 1px solid #cbd5e1; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600; color: #475569; background-color: white; }
         .badge-outline.priority-high { border-color: #fca5a5; color: #dc2626; background-color: #fef2f2; }
         
-        /* Saturation Badge Logic */
         .badge-sat-green { border-color: #bbf7d0; color: #16a34a; background-color: #dcfce7; }
         .badge-sat-yellow { border-color: #fef08a; color: #ca8a04; background-color: #fef9c3; }
         .badge-sat-red { border-color: #fecaca; color: #dc2626; background-color: #fee2e2; }
@@ -145,7 +153,6 @@
         .item-meta { display: flex; flex-wrap: wrap; gap: 0.5rem; color: #64748b; }
         .item-meta span { display: flex; align-items: center; gap: 0.25rem; background: #fff; border: 1px solid #cbd5e1; padding: 0.2rem 0.5rem; border-radius: 0.25rem;}
 
-        /* Status Colors / Themes */
         .border-complete { border-left-color: #22c55e !important; } .bg-complete { background-color: #dcfce7; color: #16a34a; border-color: #bbf7d0; }
         .border-delayed { border-left-color: #ef4444 !important; } .bg-delayed { background-color: #fee2e2; color: #dc2626; border-color: #fecaca; }
         .border-ongoing { border-left-color: #eab308 !important; } .bg-ongoing { background-color: #fef9c3; color: #ca8a04; border-color: #fef08a; }
@@ -169,40 +176,44 @@
     <main class="main-content">
         <div id="drop-zone-overlay" class="overlay">
             <div class="drop-zone" id="drop-zone">
-                <i data-lucide="folder-sync" class="icon-xl text-blue" style="margin: 0 auto 1rem auto;"></i>
-                <h2>Leitura Inteligente de Planilhas</h2>
+                <i data-lucide="folder-plus" class="icon-xl text-blue" style="margin: 0 auto 1rem auto;"></i>
+                <h2>Área de Preparação de Arquivos</h2>
                 <p>
-                    Arraste <strong>TODOS</strong> os seus arquivos Excel de uma vez.<br/>
-                    O sistema buscará automaticamente pelas abas: <i>Follow up, Saturação, Bordomaquina, Comerciais, PRPO...</i>
+                    Arraste ou selecione suas planilhas de Follow-up, Comerciais, PCP, etc.<br/>
+                    Você pode ir adicionando vários arquivos aos poucos antes de processar.
                 </p>
+                
                 <div class="btn-group">
-                    <label class="btn btn-primary"><i data-lucide="upload" class="icon-sm"></i> Enviar Arquivos
+                    <label class="btn btn-outline"><i data-lucide="file-plus" class="icon-sm"></i> Adicionar Arquivos
                         <input type="file" id="file-input" multiple accept=".xlsx, .xls, .csv" class="hidden">
                     </label>
-                    <button id="btn-demo" class="btn btn-secondary"><i data-lucide="play" class="icon-sm"></i> Carregar Dados de Exemplo</button>
                 </div>
+
+                <!-- Lista Visual da Fila de Espera -->
+                <div class="file-queue hidden" id="file-queue-container">
+                    <div class="file-queue-title">Fila de Processamento (<span id="queue-count">0</span> arquivos)</div>
+                    <div id="file-queue-list">
+                        <!-- Lista de arquivos entra aqui -->
+                    </div>
+                </div>
+
+                <div class="btn-group" style="margin-top: 0.5rem;">
+                    <button id="btn-process" class="btn btn-success" disabled><i data-lucide="cpu" class="icon-sm"></i> Processar Base de Dados</button>
+                    <button id="btn-demo" class="btn btn-secondary"><i data-lucide="play" class="icon-sm"></i> Exemplo Demo</button>
+                </div>
+
                 <div id="upload-feedback" class="upload-feedback"></div>
             </div>
         </div>
 
         <div id="dashboard-workspace" class="dashboard-workspace hidden">
-            <!-- FUNIL DE FILTROS ATUALIZADO -->
+            <!-- FUNIL DE FILTROS -->
             <div class="filters-bar">
                 <div class="filter-label"><i data-lucide="filter" class="icon-sm"></i> Filtros</div>
-                
                 <input type="text" id="filter-transmissao" placeholder="Procurar Transmissão / Part Number..." class="filter-input">
-                
-                <select id="filter-cliente" class="filter-select">
-                    <option value="">Todos os Clientes</option>
-                </select>
-
-                <select id="filter-wbs" class="filter-select">
-                    <option value="">Todos os Projetos WBS</option>
-                </select>
-
-                <select id="filter-linha" class="filter-select">
-                    <option value="">Todas as Linhas / OP</option>
-                </select>
+                <select id="filter-cliente" class="filter-select"><option value="">Todos os Clientes</option></select>
+                <select id="filter-wbs" class="filter-select"><option value="">Todos os Projetos WBS</option></select>
+                <select id="filter-linha" class="filter-select"><option value="">Todas as Linhas / OP</option></select>
             </div>
 
             <div class="stats-grid">
@@ -272,8 +283,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
 
-            // Estado Centralizado Expandido
             const state = {
+                fileQueue: [], // NOVO: Fila de arquivos para processamento
                 extractedSheets: { followUp: [], saturacao: [], bordomaquina: [], comerciais: [], prpo: [] },
                 processedData: [],
                 filters: { transmissao: '', cliente: '', wbs: '', linha: '', status: 'all' },
@@ -284,6 +295,10 @@
 
             const dropZone = document.getElementById('drop-zone');
             const fileInput = document.getElementById('file-input');
+            const btnProcess = document.getElementById('btn-process');
+            const queueContainer = document.getElementById('file-queue-container');
+            const queueList = document.getElementById('file-queue-list');
+            const queueCount = document.getElementById('queue-count');
             const modalOverlay = document.getElementById('card-modal');
             
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => {
@@ -294,28 +309,86 @@
             ['dragenter', 'dragover'].forEach(e => dropZone.addEventListener(e, () => dropZone.classList.add('dragover'), false));
             ['dragleave', 'drop'].forEach(e => dropZone.addEventListener(e, () => dropZone.classList.remove('dragover'), false));
 
-            dropZone.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files), false);
-            fileInput.addEventListener('change', (e) => handleFiles(e.target.files), false);
+            // AO SOLTAR ARQUIVOS: Apenas coloca na Fila (Não processa ainda)
+            dropZone.addEventListener('drop', (e) => queueFiles(e.dataTransfer.files), false);
+            fileInput.addEventListener('change', (e) => queueFiles(e.target.files), false);
+            
+            // AO CLICAR NO BOTÃO: Processa a Fila
+            btnProcess.addEventListener('click', processQueuedFiles);
+
             document.getElementById('btn-demo').addEventListener('click', loadDemoData);
             document.getElementById('modal-close-btn').addEventListener('click', () => modalOverlay.classList.remove('active'));
             modalOverlay.addEventListener('click', (e) => { if(e.target === modalOverlay) modalOverlay.classList.remove('active'); });
 
-            // Leitura de Arquivos Dinâmica (Smart Parser)
-            async function handleFiles(files) {
-                document.getElementById('upload-feedback').textContent = "Lendo planilhas e procurando abas...";
+            // FUNÇÃO: Enfileirar Arquivos
+            function queueFiles(files) {
+                if (files.length === 0) return;
                 
-                for (let file of files) {
+                for (let i = 0; i < files.length; i++) {
+                    // Evitar duplicatas pelo nome
+                    if (!state.fileQueue.some(f => f.name === files[i].name)) {
+                        state.fileQueue.push(files[i]);
+                    }
+                }
+                
+                updateQueueUI();
+            }
+
+            // FUNÇÃO: Atualizar Visual da Fila
+            function updateQueueUI() {
+                if (state.fileQueue.length > 0) {
+                    queueContainer.classList.remove('hidden');
+                    btnProcess.disabled = false;
+                }
+                
+                queueCount.textContent = state.fileQueue.length;
+                queueList.innerHTML = state.fileQueue.map(f => `
+                    <div class="file-queue-item">
+                        <i data-lucide="file-spreadsheet" class="icon-inline text-green"></i> 
+                        ${f.name}
+                    </div>
+                `).join('');
+                
+                lucide.createIcons({root: queueList});
+            }
+
+            // FUNÇÃO: Disparar o Processamento Real
+            async function processQueuedFiles() {
+                document.getElementById('upload-feedback').textContent = "Lendo " + state.fileQueue.length + " arquivo(s). Por favor, aguarde...";
+                btnProcess.disabled = true;
+                
+                for (let file of state.fileQueue) {
                     try {
                         const wb = await readExcel(file);
                         wb.SheetNames.forEach(sheetName => {
                             const lowerName = sheetName.toLowerCase();
+                            
+                            // Ignorar abas de backup
+                            if (lowerName.includes('bkp') || lowerName.includes('cópia') || lowerName.includes('copia') || lowerName.includes('backup')) {
+                                return;
+                            }
+
                             const data = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1 });
                             
-                            if (lowerName.includes('follow up') || lowerName.includes('follow-up')) state.extractedSheets.followUp = data;
-                            else if (lowerName.includes('saturação') || lowerName.includes('saturacao')) state.extractedSheets.saturacao = data;
-                            else if (lowerName.includes('bordomaquina') || lowerName.includes('bordo')) state.extractedSheets.bordomaquina = data;
-                            else if (lowerName.includes('comerciai') || lowerName.includes('poprog')) state.extractedSheets.comerciais.push(data);
-                            else if (lowerName.includes('prpo')) state.extractedSheets.prpo = data;
+                            if (lowerName.includes('follow up') || lowerName.includes('follow-up')) {
+                                if (state.extractedSheets.followUp.length === 0) state.extractedSheets.followUp = data;
+                                else state.extractedSheets.followUp.push(...data);
+                            }
+                            else if (lowerName.includes('saturação') || lowerName.includes('saturacao')) {
+                                if (state.extractedSheets.saturacao.length === 0) state.extractedSheets.saturacao = data;
+                                else state.extractedSheets.saturacao.push(...data);
+                            }
+                            else if (lowerName.includes('bordomaquina') || lowerName.includes('bordo')) {
+                                if (state.extractedSheets.bordomaquina.length === 0) state.extractedSheets.bordomaquina = data;
+                                else state.extractedSheets.bordomaquina.push(...data);
+                            }
+                            else if (lowerName.includes('comerciai') || lowerName.includes('poprog')) {
+                                state.extractedSheets.comerciais.push(data);
+                            }
+                            else if (lowerName.includes('prpo')) {
+                                if (state.extractedSheets.prpo.length === 0) state.extractedSheets.prpo = data;
+                                else state.extractedSheets.prpo.push(...data);
+                            }
                         });
                     } catch (error) { console.error("Erro no arquivo:", file.name, error); }
                 }
@@ -323,6 +396,7 @@
                 document.getElementById('badge-system').innerHTML = `<i data-lucide="check-circle" class="icon-sm text-green"></i> BD: <span class="text-green">Integrado</span>`;
                 lucide.createIcons();
                 document.getElementById('upload-feedback').textContent = "Cruzando dados...";
+                
                 setTimeout(() => {
                     processExtractedData();
                     document.getElementById('drop-zone-overlay').classList.add('hidden');
@@ -345,78 +419,92 @@
             function formatDate(date) { return (!date || isNaN(date)) ? '-' : new Date(date.getTime() + 86400000).toLocaleDateString('pt-BR'); }
             function formatCur(val) { return (!val || isNaN(val)) ? 'R$ 0,00' : Number(val).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}); }
 
-            // --- PROCESSAMENTO CENTRALIZADO (ERP CORE) ---
+            function cleanTr(str) { return String(str || '').replace(/[\u200B-\u200D\uFEFF]/g, '').trim(); }
+
+            // --- PROCESSAMENTO CENTRALIZADO (ERP CORE BLINDADO) ---
             function processExtractedData() {
                 const trMap = new Map();
                 const supRiscoMap = new Map(); 
-                const pcpMap = new Map(); 
                 
                 state.uniqueClientes.clear();
                 state.uniqueWBS.clear();
                 state.uniqueLinhas.clear();
 
-                // 1. Mapear Risco de Fornecedor (Aba Saturação)
+                function getOrCreateCard(trId) {
+                    if (!trMap.has(trId)) {
+                        trMap.set(trId, {
+                            id: trId, cliente: 'N/A', linhaOp: 'N/A', descricao: 'S/ Descrição', projetoWBS: 'N/A',
+                            construtivo: null, riscoFornecedor: { saturacaoPerc: 0, nota: 'N/A' }, pcp: null, comerciais: [], logisticaAdvanced: {}
+                        });
+                    }
+                    return trMap.get(trId);
+                }
+
+                // 1. Mapear Risco de Fornecedor
                 if(state.extractedSheets.saturacao.length) {
                     state.extractedSheets.saturacao.forEach(r => {
                         if(r.length < 5) return;
-                        supRiscoMap.set(String(r[0]).trim().toUpperCase(), {
-                            saturacaoPerc: parseFloat(r[2]) || 0,
-                            nota: r[4] || 'N/A'
-                        });
+                        supRiscoMap.set(String(r[0]).trim().toUpperCase(), { saturacaoPerc: parseFloat(r[2]) || 0, nota: r[4] || 'N/A' });
                     });
                 }
 
-                // 2. Mapear PCP Bordo de Máquina (Aba Bordomaquina)
+                // 2. Mapear PCP Bordo de Máquina 
                 if(state.extractedSheets.bordomaquina.length) {
                     state.extractedSheets.bordomaquina.forEach(r => {
                         if(r.length < 15) return;
-                        const tr = String(r[1]).trim();
-                        if(tr) pcpMap.set(tr, {
+                        const tr = cleanTr(r[1]);
+                        if(!tr || tr.toLowerCase().includes('transmissão')) return;
+                        
+                        let card = getOrCreateCard(tr);
+                        card.pcp = {
                             dataEntrega: excelToJSDate(r[3]),
                             projEle: r[6] || '-', projPneu: r[7] || '-', projTop: r[8] || '-',
                             matEle: r[9] || '0', matPneu: r[10] || '0', misc: r[11] || '-',
                             placaAlum: r[12] || '-', etiQ: r[13] || '-', qrCode: r[14] || '-',
                             testes: r[15] || '-', obsPcp: r[16] || ''
-                        });
+                        };
                     });
                 }
 
-                // 3. Mapear Construtivos (Follow Up) - Base
+                // 3. Mapear Construtivos (Follow Up)
                 if(state.extractedSheets.followUp.length) {
                     for (let i = 1; i < state.extractedSheets.followUp.length; i++) {
                         const r = state.extractedSheets.followUp[i];
                         if (!r || r.length < 5) continue;
                         
+                        const tr = cleanTr(r[4]);
+                        if (!tr || tr.toLowerCase().includes('transmissão')) continue; 
+                        
                         const cliente = String(r[0] || '').trim();
                         const wbs = String(r[1] || '').trim();
                         const linha = String(r[2] || '').trim();
                         const desc = String(r[3] || '').trim();
-                        const tr = String(r[4] || '').trim();
                         
-                        if (!tr || tr.toLowerCase().includes('transmissão')) continue; 
-                        
-                        if (cliente) state.uniqueClientes.add(cliente);
-                        if (wbs) state.uniqueWBS.add(wbs);
-                        if (linha) state.uniqueLinhas.add(linha);
+                        if (cliente && cliente !== 'N/A') state.uniqueClientes.add(cliente);
+                        if (wbs && wbs !== 'N/A') state.uniqueWBS.add(wbs);
+                        if (linha && linha !== 'N/A') state.uniqueLinhas.add(linha);
 
                         const fornecedorName = String(r[11] || '').trim().toUpperCase();
-                        const pcpData = pcpMap.get(tr) || null;
                         const riscoData = supRiscoMap.get(fornecedorName) || { saturacaoPerc: 0, nota: 'N/A' };
                         const prioridadeRaw = r[23] !== undefined && r[23] !== '' ? String(r[23]).trim() : '';
 
-                        trMap.set(tr, {
-                            id: tr, cliente: cliente || 'S/ Cliente', linhaOp: linha || 'S/ Linha', descricao: desc, projetoWBS: wbs || 'S/ WBS',
-                            construtivo: {
-                                rev: r[5] || '-', makeBuy: r[8] || '-', fornecedor: fornecedorName,
-                                inicio: excelToJSDate(r[9]), entregaForn: excelToJSDate(r[12]),
-                                reprog: excelToJSDate(r[14]), entregaMfg: excelToJSDate(r[13]),
-                                statusSys: String(r[15] || '').trim(), valorTot: r[16] || 0,
-                                horasPlanejadas: r[17] || 0, respFollow: r[18] || '-',
-                                nf: r[19] || '-', comercialResp: r[20] || '-', status: r[21] || '-',
-                                localEnt: r[22] || '-', prioridade: prioridadeRaw, obs: r[7] || ''
-                            },
-                            riscoFornecedor: riscoData, pcp: pcpData, comerciais: [], logisticaAdvanced: {}
-                        });
+                        let card = getOrCreateCard(tr);
+                        
+                        card.cliente = cliente || card.cliente;
+                        card.linhaOp = linha || card.linhaOp;
+                        card.descricao = desc || card.descricao;
+                        card.projetoWBS = wbs || card.projetoWBS;
+                        
+                        card.construtivo = {
+                            rev: r[5] || '-', makeBuy: r[8] || '-', fornecedor: fornecedorName,
+                            inicio: excelToJSDate(r[9]), entregaForn: excelToJSDate(r[12]),
+                            reprog: excelToJSDate(r[14]), entregaMfg: excelToJSDate(r[13]),
+                            statusSys: String(r[15] || '').trim(), valorTot: r[16] || 0,
+                            horasPlanejadas: r[17] || 0, respFollow: r[18] || '-',
+                            nf: r[19] || '-', comercialResp: r[20] || '-', status: r[21] || '-',
+                            localEnt: r[22] || '-', prioridade: prioridadeRaw, obs: r[7] || ''
+                        };
+                        card.riscoFornecedor = riscoData;
                     }
                 }
 
@@ -424,22 +512,18 @@
                 const processCom = (sheet) => {
                     for (let i = 1; i < sheet.length; i++) {
                         const r = sheet[i]; if (!r || r.length < 2) continue;
-                        const tr = String(r[0] || '').trim();
+                        const tr = cleanTr(r[0]);
                         if (!tr || tr.toLowerCase().includes('transmissão')) continue;
 
-                        let obj = trMap.get(tr);
-                        if (!obj) {
-                            obj = { id: tr, cliente: 'N/A', linhaOp: 'N/A', projetoWBS: 'N/A', descricao: 'Apenas Com.', construtivo: null, pcp: pcpMap.get(tr)||null, comerciais: [], logisticaAdvanced: {} };
-                            trMap.set(tr, obj);
-                        }
+                        let card = getOrCreateCard(tr);
 
                         const rc = String(r[5] || '').trim(); const oc = String(r[9] || '').trim();
                         
-                        if(r[21] && String(r[21]).includes('FOB')) obj.logisticaAdvanced.frete = r[21]; 
-                        if(r[19] && String(r[19]).includes('BRBC')) obj.logisticaAdvanced.cc = r[19]; 
-                        if(r[25]) obj.logisticaAdvanced.presencaCarga = excelToJSDate(r[25]);
+                        if(r[21] && String(r[21]).includes('FOB')) card.logisticaAdvanced.frete = r[21]; 
+                        if(r[19] && String(r[19]).includes('BRBC')) card.logisticaAdvanced.cc = r[19]; 
+                        if(r[25]) card.logisticaAdvanced.presencaCarga = excelToJSDate(r[25]);
 
-                        obj.comerciais.push({
+                        card.comerciais.push({
                             desc: r[1] || '', pn: r[2] || '-', qtd: r[4] || 0,
                             rc: rc, oc: oc, forn: r[11] || '',
                             dtEnt: excelToJSDate(r[12]), nf: r[13] || '', pull: r[14] || ''
@@ -472,8 +556,8 @@
                         else constStatus = 'Ongoing';
                     }
                     
-                    let engStatus = card.pcp ? (card.pcp.projEle.toLowerCase().includes('liberad') ? 'Complete' : 'Ongoing') : (card.construtivo ? 'Complete' : 'Vazio'); 
-                    let mfgStatus = card.pcp ? (card.pcp.testes.toLowerCase().includes('ok') ? 'Complete' : 'Ongoing') : ((constStatus !== 'Vazio' || cStatus !== 'Vazio') ? 'Ongoing' : 'Vazio');
+                    let engStatus = card.pcp ? (String(card.pcp.projEle).toLowerCase().includes('liberad') ? 'Complete' : 'Ongoing') : (card.construtivo ? 'Complete' : 'Vazio'); 
+                    let mfgStatus = card.pcp ? (String(card.pcp.testes).toLowerCase().includes('ok') ? 'Complete' : 'Ongoing') : ((constStatus !== 'Vazio' || cStatus !== 'Vazio') ? 'Ongoing' : 'Vazio');
                     let delStatus = mfgStatus !== 'Vazio' ? (mfgStatus === 'Complete' ? 'Complete' : 'Ongoing') : 'Vazio';
 
                     const stages = [engStatus, pStatus, cStatus, constStatus, mfgStatus, delStatus];
@@ -488,7 +572,6 @@
                 renderGrid();
             }
 
-            // --- POPULAR DROPDOWNS ---
             function populateDropdowns() {
                 const clienteSel = document.getElementById('filter-cliente');
                 clienteSel.innerHTML = '<option value="">Todos os Clientes</option>';
@@ -503,7 +586,6 @@
                 Array.from(state.uniqueLinhas).sort().forEach(l => { if(l) linhaSel.appendChild(new Option(l, l)); });
             }
 
-            // --- LISTENERS DE FILTRO ---
             document.getElementById('filter-transmissao').addEventListener('input', (e) => { state.filters.transmissao = e.target.value.toLowerCase(); renderGrid(); });
             document.getElementById('filter-cliente').addEventListener('change', (e) => { state.filters.cliente = e.target.value; renderGrid(); });
             document.getElementById('filter-wbs').addEventListener('change', (e) => { state.filters.wbs = e.target.value; renderGrid(); });
@@ -517,7 +599,6 @@
                 });
             });
 
-            // --- UI LOGIC ---
             function getTheme(st) {
                 switch(st) {
                     case 'Complete': return { b: 'border-complete', bg: 'bg-complete', i: 'check-circle-2', t: 'Concluído', c: 'complete' };
@@ -531,7 +612,6 @@
                 const container = document.getElementById('cards-container');
                 container.innerHTML = '';
                 
-                // Funil Inteligente: Testa todas as condições juntas
                 const filtered = state.processedData.filter(c => 
                     (c.id.toLowerCase().includes(state.filters.transmissao) || c.descricao.toLowerCase().includes(state.filters.transmissao)) &&
                     (state.filters.cliente === '' || c.cliente === state.filters.cliente) &&
@@ -576,7 +656,6 @@
                 lucide.createIcons({ root: container });
             }
 
-            // --- MODAL POPULATE ---
             const iconM = {'Engineering':'pen-tool','Purchasing':'shopping-cart','Commercial':'dollar-sign','Constructives':'wrench','Manufacturing':'factory','Delivery':'truck'};
             
             function openModal(card) {
@@ -605,7 +684,6 @@
                     return `<div class="step ${st.c}"><div class="step-icon-wrapper" title="${st.t}"><i data-lucide="${iconM[k]||'circle'}" class="icon-md"></i></div><div class="step-label">${k}</div></div>`;
                 }).join('');
 
-                // COL 1: Engenharia
                 let engH = '<p class="text-slate text-sm">Sem dados de PCP/Engenharia.</p>';
                 if(card.pcp || card.construtivo) {
                     engH = `
@@ -619,7 +697,6 @@
                 }
                 document.getElementById('modal-eng-data').innerHTML = engH;
 
-                // COL 2: Construtivo
                 let conH = '<p class="text-slate text-sm">Sem dados de fornecimento externo.</p>';
                 if(card.construtivo) {
                     const rPerc = card.riscoFornecedor.saturacaoPerc * 100;
@@ -638,7 +715,6 @@
                 }
                 document.getElementById('modal-construtivo-data').innerHTML = conH;
 
-                // COL 3: PCP
                 let pcpH = '<p class="text-slate text-sm">Transmissão não listada no Bordo de Máquina.</p>';
                 if(card.pcp) {
                     pcpH = `
@@ -653,7 +729,6 @@
                 }
                 document.getElementById('modal-pcp-data').innerHTML = pcpH;
 
-                // COL 4: Finanças
                 let finH = '<p class="text-slate text-sm">Sem info. financeira/PRPO.</p>';
                 if(card.construtivo || card.logisticaAdvanced.cc) {
                     finH = `
@@ -667,7 +742,6 @@
                 }
                 document.getElementById('modal-fin-data').innerHTML = finH;
 
-                // FULL ROW: Comerciais
                 let comH = '<p class="text-slate text-sm">Nenhum item BOM associado.</p>';
                 if(card.comerciais.length) {
                     comH = card.comerciais.map(c => `
@@ -689,7 +763,6 @@
                 modalOverlay.classList.add('active');
             }
 
-            // --- DEMO DATA ---
             function loadDemoData() {
                 document.getElementById('upload-feedback').textContent = "Carregando ambiente de teste ERP...";
                 
@@ -707,7 +780,8 @@
                 state.extractedSheets.bordomaquina = [
                     ["ID", "TRANSMISSÃO", "OPERAÇÃO", "DATA", "LOCAL", "PRIO", "PROJ ELE", "PROJ PNEU", "PROJ TOP", "MAT ELE", "MAT PNEU", "MISC", "PLACA", "ETIQ", "QR", "TESTES", "OBS"],
                     [1, "VW427-PATAGONIA-AUFBAU-0035-2025", "OP10", 46000, "Betim", "N", "Liberado", "Liberado", "N/A", "1", "1", "Ok", "Fixada", "Colado", "Gerado", "Testes OK", "Sem Pendências"],
-                    [2, "VW247-PATAGONIA-BODYSIDE-0001-2025", "OP20", 46050, "Santo André", "S", "Em Análise", "Não liberado", "N/A", "0.2", "0", "Pendente", "-", "-", "-", "Pendente", "Aguardando Mat."]
+                    [2, "VW247-PATAGONIA-BODYSIDE-0001-2025", "OP20", 46050, "Santo André", "S", "Em Análise", "Não liberado", "N/A", "0.2", "0", "Pendente", "-", "-", "-", "Pendente", "Aguardando Mat."],
+                    [3, "STL-PSA-BB21-JJ-PCK01-0102-2024", "OP25", 46060, "Betim", "N", "Liberado", "Liberado", "N/A", "1", "1", "Ok", "Fixada", "Colado", "Gerado", "Testes OK", "Apenas PCP"]
                 ];
 
                 state.extractedSheets.followUp = [
