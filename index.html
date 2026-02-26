@@ -647,7 +647,7 @@
                             <p class="card-desc" title="${card.descricao}">${card.descricao || '-'}</p>
                             <div class="card-stages">${sHtml}</div>
                             ${card.construtivo ? `<div class="card-footer"><div class="card-footer-item"><i data-lucide="factory" class="icon-inline"></i> <span>${card.construtivo.fornecedor.substring(0,15)}</span></div><div class="card-footer-item"><i data-lucide="flag" class="icon-inline"></i> <span>${formatDate(card.construtivo.entregaMfg)}</span></div></div>` : ''}
-                            <button class="view-details-btn"><i data-lucide="scan-search" class="icon-sm"></i> Detalhamento E2E</button>
+                            <button class="view-details-btn"><i data-lucide="scan-search" class="icon-sm"></i> Detalhamento</button>
                         `;
                         el.addEventListener('click', () => openModal(card));
                         container.appendChild(el);
