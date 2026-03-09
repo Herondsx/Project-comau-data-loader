@@ -1,2 +1,0 @@
--- tabelas.sql - Script de criação das tabelas do banco PostgreSQL
--- Tabelas: projetos, linhas_montagem, transmissoes, materiais
