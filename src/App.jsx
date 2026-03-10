@@ -4,6 +4,7 @@ import Cabecalho from './componentes/Cabecalho.jsx'
 import Inicio from './paginas/Inicio.jsx'
 import Visualizacao from './paginas/Visualizacao.jsx'
 import { processarDados, DEMO_SHEETS } from './utils/processamento.js'
+import { fetchAllSheets } from './utils/gvizUtils.js'
 
 const SHEETS_INICIAL = {
   followUp: [],
@@ -76,6 +77,29 @@ export default function App() {
     }, 800)
   }, [fileQueue])
 
+  // Processar planilhas via Google Sheets (sem API key)
+  const handleProcessSheets = useCallback(async (urls) => {
+    setFeedback('Conectando à planilha...')
+    try {
+      const { sheets, summary } = await fetchAllSheets(urls, (msg) => setFeedback(msg))
+      const abasEncontradas = summary.flatMap(s => Object.values(s.found ?? {})).length
+      if (abasEncontradas === 0) {
+        setFeedback('Nenhuma aba reconhecida. Verifique o compartilhamento e os nomes das abas.')
+        return
+      }
+      setBadgeStatus('integrated')
+      setFeedback('Cruzando dados...')
+      setTimeout(() => {
+        aplicarResultado(sheets)
+        setTela('dashboard')
+        setFeedback('')
+      }, 800)
+    } catch (err) {
+      console.error('Erro ao importar planilha:', err)
+      setFeedback('Erro ao conectar. Verifique se a planilha está pública.')
+    }
+  }, [])
+
   // Carregar dados de demonstração
   const handleDemo = useCallback(() => {
     setFeedback('Carregando ambiente de demonstração...')
@@ -110,6 +134,7 @@ export default function App() {
             onProcess={handleProcessar}
             onDemo={handleDemo}
             feedback={feedback}
+            onProcessSheets={handleProcessSheets}
           />
         )}
 

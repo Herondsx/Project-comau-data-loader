@@ -1,4 +1,4 @@
-import { Layers, Database, CheckCircle } from 'lucide-react'
+import { Database, CheckCircle, Activity } from 'lucide-react'
 
 export default function Cabecalho({ badgeStatus }) {
   const renderBadge = () => {
@@ -13,7 +13,7 @@ export default function Cabecalho({ badgeStatus }) {
     if (badgeStatus === 'demo') {
       return (
         <>
-          <CheckCircle className="icon-sm text-green" />
+          <Activity className="icon-sm text-green" />
           BD: <span className="text-green">Demo</span>
         </>
       )
@@ -21,7 +21,7 @@ export default function Cabecalho({ badgeStatus }) {
     return (
       <>
         <Database className="icon-sm" />
-        Banco de Dados: <span className="text-red">Aguardando</span>
+        Banco: <span className="text-red">Aguardando</span>
       </>
     )
   }
@@ -29,14 +29,19 @@ export default function Cabecalho({ badgeStatus }) {
   return (
     <header className="app-header">
       <div className="header-title-wrapper">
-        <Layers className="icon-lg text-yellow" />
+        <img
+          src="/logo-comau.png"
+          alt="COMAU"
+          className="header-logo-img"
+        />
         <h1 className="header-title">
           SUPPLY CHAIN TRACKER
-          <span className="header-subtitle">ERP COMAU</span>
+          <span className="header-subtitle">· ERP COMAU</span>
         </h1>
       </div>
+
       <div className="header-badges">
-        <div className="status-badge-top">
+        <div className={`status-badge-top ${badgeStatus}`}>
           {renderBadge()}
         </div>
       </div>

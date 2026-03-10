@@ -26,6 +26,7 @@ export default function ArvoreHierarquia({ stages }) {
               {IconStage && <IconStage className="icon-md" />}
             </div>
             <div className="step-label">{key}</div>
+            <div className="step-status-text">{theme.t}</div>
           </div>
         )
       })}

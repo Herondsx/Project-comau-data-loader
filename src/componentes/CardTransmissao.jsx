@@ -10,17 +10,21 @@ const STAGES_MAP = [
   { k: 'Delivery', l: 'DEL' }
 ]
 
-export default function CardTransmissao({ card, onSelect }) {
+export default function CardTransmissao({ card, onSelect, index = 0 }) {
   const theme = getTheme(card.overallStatus)
   const { Icon: StatusIcon } = theme
 
   return (
-    <div className={`card ${theme.b}`} onClick={() => onSelect(card)}>
+    <div
+      className={`card ${theme.b}`}
+      onClick={() => onSelect(card)}
+      style={{ animationDelay: `${Math.min(index * 55, 550)}ms` }}
+    >
       {/* Header */}
       <div className="card-header">
         <div>
-          <span className="card-tag" title="Cliente | Linha">
-            {card.cliente} | {card.linhaOp}
+          <span className="card-tag">
+            {card.cliente} · {card.linhaOp}
           </span>
           <h3 className="card-title">{card.id}</h3>
         </div>

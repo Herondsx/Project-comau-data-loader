@@ -4,7 +4,7 @@ import BotaoUpload from '../componentes/BotaoUpload.jsx'
  * Página inicial: tela de upload de arquivos.
  * Renderiza sobre o dashboard enquanto nenhum dado foi processado.
  */
-export default function Inicio({ fileQueue, onAddFiles, onProcess, onDemo, feedback }) {
+export default function Inicio({ fileQueue, onAddFiles, onProcess, onDemo, feedback, onProcessSheets }) {
   return (
     <BotaoUpload
       fileQueue={fileQueue}
@@ -12,6 +12,7 @@ export default function Inicio({ fileQueue, onAddFiles, onProcess, onDemo, feedb
       onProcess={onProcess}
       onDemo={onDemo}
       feedback={feedback}
+      onProcessSheets={onProcessSheets}
     />
   )
 }
